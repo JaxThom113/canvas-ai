@@ -1,0 +1,17 @@
+{
+    "Gainesville": {
+        "temperature": 88,
+        "conditions": "Sunny",
+        "humidity": 65
+    },
+    "Orlando": {
+        "temperature": 91,
+        "conditions": "Partly cloudy",
+        "humidity": 70
+    },
+    "Miami": {
+        "temperature": 94,
+        "conditions": "Rainy",
+        "humidity": 80
+    }
+}
