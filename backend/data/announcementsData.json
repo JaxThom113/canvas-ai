@@ -1,0 +1,31 @@
+{
+    "announcements": [
+        {
+            "id": "ANN001",
+            "course_id": "COP4600",
+            "course": "Operating Systems",
+            "title": "Project 1 Clarification",
+            "message": "The scheduling project requirements have been updated. You are only required to implement FCFS, SJF, and Round Robin.",
+            "posted_at": "2026-08-24T14:30:00",
+            "important": true
+        },
+        {
+            "id": "ANN002",
+            "course_id": "CIS4930",
+            "course": "AI and Machine Learning",
+            "title": "Exam Date Changed",
+            "message": "The first exam has been moved from September 8 to September 10.",
+            "posted_at": "2026-08-25T10:00:00",
+            "important": true
+        },
+        {
+            "id": "ANN003",
+            "course_id": "DIG3110",
+            "course": "Digital Arts",
+            "title": "Optional Blender Workshop",
+            "message": "An optional Blender workshop will be held Wednesday at 6 PM.",
+            "posted_at": "2026-08-25T12:00:00",
+            "important": false
+        }
+    ]
+}
