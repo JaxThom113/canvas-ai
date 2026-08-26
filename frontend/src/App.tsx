@@ -1,6 +1,42 @@
+import { useState } from 'react'
 import './App.css'
 
 function App() {
+  const [message, setMessage] = useState("");
+  const [response, setResponse] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function sendMessage(event: React.FormEvent<HTMLFormElement>) 
+  {
+    event.preventDefault();
+    setLoading(true);
+
+    try 
+    {
+      const res = await fetch("http://localhost:8000/chat", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+              message: message
+          })
+      });
+
+      const data = await res.json();
+      setResponse(data.response);
+    } 
+    catch (error) 
+    {
+      console.error(error);
+      setResponse("Failed to contact backend.");
+    } 
+    finally 
+    {
+      setLoading(false);
+    }
+  }
+
   return (
     <>
       <div className="flex flex-col items-center justify-center isolate p-6 bg-gray-900 sm:py-10 lg:px-30">
@@ -21,29 +57,40 @@ function App() {
           CanvasAI
         </h1>
 
-        <div>
-          <label htmlFor="first-name" className="block text-sm/6 font-semibold text-white">
+        <form onSubmit={sendMessage} className="flex flex-col items-center">
+          <label htmlFor="prompt" className="block text-sm/6 font-semibold text-white">
             Ask a question!
           </label>
           <div className="mt-2.5">
             <input
-              id="first-name"
-              name="first-name"
+              id="prompt"
+              name="prompt"
               type="text"
-              autoComplete="given-name"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="What would you like to know?"
+              autoComplete="off"
               className="block w-100 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
             />
           </div>
-        </div>
 
-        <div className="mt-6">
+          <div className="mt-6">
           <button
             type="submit"
+            disabled={loading}
             className="block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
-            Submit
+            {loading ? 'Submitting...' : 'Submit'}
           </button>
-        </div>
+          </div>
+
+          {/* {error && <p className="mt-4 text-sm text-red-300">{error}</p>} */}
+          {response && (
+            <div className="mt-6 max-w-2xl whitespace-pre-wrap rounded-md bg-white/10 p-4 text-left text-white">
+              {response}
+            </div>
+          )}
+        </form>
 
       </div>
     </>
