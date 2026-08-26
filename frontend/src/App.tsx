@@ -1,5 +1,12 @@
-import { useState } from 'react'
+/// <reference types="chrome" />
+import { useEffect, useState } from 'react'
 import './App.css'
+
+interface CanvasCourse {
+  id: number;
+  name?: string;
+  course_code?: string;
+}
 
 function App() {
   const [message, setMessage] = useState("");
@@ -34,6 +41,88 @@ function App() {
     finally 
     {
       setLoading(false);
+    }
+  }
+
+  const [cdMessage, setCdMessage] = useState("");
+  const [cdStatus, setCdStatus] = useState("");
+  const [cdLoading, setCdLoading] = useState(false);
+  const [courses, setCourses] = useState<CanvasCourse[]>([]);
+
+  // load the last-used Canvas base URL
+  useEffect(() => {
+    chrome.storage.local.get(["canvasBaseUrl"], (result: { canvasBaseUrl?: string }) => {
+      if (result.canvasBaseUrl) {
+        setCdMessage(result.canvasBaseUrl);
+      }
+    });
+  }, []);
+  
+  async function getCanvasData(event: React.FormEvent<HTMLFormElement>) 
+  {
+    event.preventDefault();
+
+    const rawBase = cdMessage.trim().replace(/\/+$/, "");
+    if (!rawBase) {
+      setCdStatus("Enter your Canvas base URL first.");
+      return; 
+    }
+
+    setCdLoading(true);
+    setCourses([]);
+    setCdStatus("Fetching...");
+
+    chrome.storage.local.set({ canvasBaseUrl: rawBase });
+
+    const endpoint =
+      `${rawBase}/api/v1/courses?enrollment_state=active&per_page=100`;
+
+    // const endpoint = 
+    //   `${rawBase}/api/v1/users/self/profile`
+
+    try 
+    {
+      const res = await fetch(endpoint, {
+        method: "GET",
+        credentials: "include", // sends your existing Canvas session cookie
+        headers: {
+          Accept: "application/json",
+        },
+      });
+ 
+      if (res.status === 401 || res.status === 403) 
+      {
+        setCdStatus("Not authenticated. Make sure you're logged into Canvas in this browser, then try again.");
+        return;
+      }
+ 
+      if (!res.ok) 
+      {
+        setCdStatus(`Request failed: ${res.status} ${res.statusText}`);
+        return;
+      }
+ 
+      const data: CanvasCourse[] = await res.json();
+      console.log("Canvas courses:", data);
+ 
+      if (!Array.isArray(data) || data.length === 0) 
+      {
+        setCdStatus("No active courses found.");
+        return;
+      }
+ 
+      setCdStatus(`${data.length} course(s) found.`);
+      setCourses(data);
+    } 
+    catch (err) 
+    {
+      const message = err instanceof Error ? err.message : String(err);
+      setCdStatus("Error: " + message);
+      console.error(err);
+    } 
+    finally 
+    {
+      setCdLoading(false);
     }
   }
 
@@ -90,6 +179,52 @@ function App() {
               {response}
             </div>
           )}
+        </form>
+
+
+        <form onSubmit={getCanvasData} className="flex flex-col items-center">
+          <label htmlFor="prompt" className="block text-sm/6 font-semibold text-white">
+            Input your Canvas base URL:
+          </label>
+          <div className="mt-2.5">
+            <input
+              id="prompt"
+              name="prompt"
+              type="text"
+              value={cdMessage}
+              onChange={(e) => setCdMessage(e.target.value)}
+              placeholder="https://ufl.instructure.com"
+              autoComplete="off"
+              className="block w-100 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+            />
+          </div>
+          
+          <div className="mt-6">
+          <button
+            type="submit"
+            disabled={cdLoading}
+            className="block rounded-md bg-orange-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+          >
+            {cdLoading ? 'Submitting...' : 'Submit'}
+          </button>
+          </div>
+
+          
+          {cdStatus && <p className="mt-4 text-sm text-red-300">{cdStatus}</p>}
+ 
+          {courses.length > 0 && (
+            <ul className="mt-6 max-w-2xl w-full rounded-md bg-white/10 p-4 text-left text-white">
+              {courses.map((course) => (
+                <li key={course.id} className="border-b border-white/10 py-2 last:border-none">
+                  {course.name || course.course_code || `Course ${course.id}`}
+                  {course.course_code && (
+                    <div className="text-xs text-gray-400">{course.course_code}</div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
         </form>
 
       </div>
