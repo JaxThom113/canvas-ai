@@ -1,0 +1,52 @@
+{
+    "assignments": [
+        {
+            "id": "A101",
+            "course_id": "COP4600",
+            "course": "Operating Systems",
+            "name": "Process Scheduling Project",
+            "description": "Implement and test three CPU scheduling algorithms.",
+            "due_date": "2026-08-27T23:59:00",
+            "points": 100,
+            "submission_type": "online_upload",
+            "status": "not_submitted",
+            "estimated_hours": 5
+        },
+        {
+            "id": "A102",
+            "course_id": "CEN3031",
+            "course": "Software Engineering",
+            "name": "Requirements Specification",
+            "description": "Write the requirements specification for the semester project.",
+            "due_date": "2026-08-28T23:59:00",
+            "points": 75,
+            "submission_type": "online_upload",
+            "status": "not_submitted",
+            "estimated_hours": 3
+        },
+        {
+            "id": "A103",
+            "course_id": "CIS4930",
+            "course": "AI and Machine Learning",
+            "name": "Neural Networks Homework",
+            "description": "Complete questions 1-15 covering backpropagation.",
+            "due_date": "2026-08-29T23:59:00",
+            "points": 50,
+            "submission_type": "online_text",
+            "status": "not_submitted",
+            "estimated_hours": 2
+        },
+        {
+            "id": "A104",
+            "course_id": "DIG3110",
+            "course": "Digital Arts",
+            "name": "Blender Modeling Assignment",
+            "description": "Create a low-poly environment in Blender.",
+            "due_date": "2026-09-01T23:59:00",
+            "points": 100,
+            "submission_type": "online_upload",
+            "status": "not_submitted",
+            "estimated_hours": 6
+        }
+    ]
+}
