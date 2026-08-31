@@ -5,5 +5,13 @@
     "description": "AI agent extension for Canvas.",
     "action": {
         "default_popup": "index.html"
-    }
+    },
+    "host_permissions": [
+        "https://*.instructure.com/*"
+    ],
+    "permissions": [
+        "storage",
+        "activeTab",
+        "cookies"
+    ]
 }
