@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS chat_app
+CREATE DATABASE IF NOT EXISTS canvas_ai
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE chat_app;
+USE canvas_ai;
 
 -- login
 CREATE TABLE login (
