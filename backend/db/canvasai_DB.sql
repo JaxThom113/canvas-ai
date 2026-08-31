@@ -39,3 +39,5 @@ CREATE TABLE chat (
 -- indexes
 CREATE INDEX idx_session_account_id ON session(account_id);
 CREATE INDEX idx_chat_session_id ON chat(session_id);
+
+-- hey there!
