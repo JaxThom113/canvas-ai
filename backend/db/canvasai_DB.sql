@@ -1,8 +1,8 @@
-CREATE DATABASE IF NOT EXISTS chat_app
+CREATE DATABASE IF NOT EXISTS canvas_ai
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE chat_app;
+USE canvas_ai;
 
 -- login
 CREATE TABLE login (
@@ -39,3 +39,5 @@ CREATE TABLE chat (
 -- indexes
 CREATE INDEX idx_session_account_id ON session(account_id);
 CREATE INDEX idx_chat_session_id ON chat(session_id);
+
+-- hey there!
