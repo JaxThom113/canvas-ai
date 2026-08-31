@@ -11,11 +11,11 @@ interface CanvasCourse {
 
 /*
     This component accepts a Canvas base URL (such as https://ufl.instructure.com)
-    and returns account data accessible in cookies
+    and returns account data accessible in Canvas session cookies
 */  
 
 function CanvasInfo() {
-  const [input, setInput] = useState("");
+  const [baseURL, setBaseURL] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const [courses, setCourses] = useState<CanvasCourse[]>([]);
@@ -24,7 +24,7 @@ function CanvasInfo() {
   useEffect(() => {
     chrome.storage.local.get(["canvasBaseUrl"], (result: { canvasBaseUrl?: string }) => {
       if (result.canvasBaseUrl) {
-        setInput(result.canvasBaseUrl);
+        setBaseURL(result.canvasBaseUrl);
       }
     });
   }, []);
@@ -32,17 +32,25 @@ function CanvasInfo() {
   async function getCanvasData(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const rawBase = input.trim().replace(/\/+$/, "");
-    if (!rawBase) {
-      setStatus("Enter your Canvas base URL first.");
-      return; 
+    // get the base URL from the currently open Canvas tab
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      lastFocusedWindow: true,
+    });
+
+    if (!tab.url) {
+      setStatus("Base URL could not be accessed.");
+      return;
     }
+
+    // access base URL of open Canvas instance (i.e. https://schoolname.instructure.com)
+    setBaseURL(new URL(tab.url).origin);
 
     setLoading(true);
     setCourses([]);
     setStatus("Fetching...");
 
-    chrome.storage.local.set({ canvasBaseUrl: rawBase });
+    chrome.storage.local.set({ canvasBaseUrl: baseURL });
 
     /*
         Other endpoints can be:
@@ -54,8 +62,7 @@ function CanvasInfo() {
         `${rawBase}/api/v1/calendar_events?type=event`
     */
 
-    const endpoint =
-      `${rawBase}/api/v1/courses?enrollment_state=active&per_page=100`;
+    const endpoint = `${baseURL}/api/v1/courses?enrollment_state=active&per_page=100`;
 
     try {
       const res = await fetch(endpoint, {
@@ -101,31 +108,18 @@ function CanvasInfo() {
     <>
         <form onSubmit={getCanvasData} className="flex flex-col items-center">
             <label htmlFor="prompt" className="block text-sm/6 font-semibold text-white">
-            Input your Canvas base URL:
+                Click to access course info:
             </label>
-            <div className="mt-2.5">
-            <input
-                id="prompt"
-                name="prompt"
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="https://ufl.instructure.com"
-                autoComplete="off"
-                className="block w-100 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
-            />
-            </div>
             
             <div className="mt-6">
-            <button
-            type="submit"
-            disabled={loading}
-            className="block rounded-md bg-orange-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-            >
-            {loading ? 'Submitting...' : 'Submit'}
-            </button>
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="block rounded-md bg-orange-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                    >
+                    {loading ? 'Getting courses...' : 'Get courses'}
+                </button>
             </div>
-
             
             {status && <p className="mt-4 text-sm text-red-300">{status}</p>}
 
