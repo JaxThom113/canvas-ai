@@ -41,6 +41,7 @@ function Chat() {
 
   return (
     <>
+      <div className="mt-6">
         <form onSubmit={sendMessage} className="flex flex-col items-center">
           <label htmlFor="prompt" className="block text-sm/6 font-semibold text-white">
             Ask a question!
@@ -59,22 +60,22 @@ function Chat() {
           </div>
 
           <div className="mt-6">
-          <button
-            type="submit"
-            disabled={loading}
-            className="block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-          >
-            {loading ? 'Submitting...' : 'Submit'}
-          </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+            >
+              {loading ? 'Submitting...' : 'Submit'}
+            </button>
           </div>
 
-          {/* {error && <p className="mt-4 text-sm text-red-300">{error}</p>} */}
           {response && (
             <div className="mt-6 max-w-2xl whitespace-pre-wrap rounded-md bg-white/10 p-4 text-left text-white">
               {response}
             </div>
           )}
         </form>
+      </div>
     </>
   )
 }

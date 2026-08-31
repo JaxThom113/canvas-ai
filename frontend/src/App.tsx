@@ -20,7 +20,7 @@ function App() {
           />
         </div>
 
-        <h1 className="block text-4xl font-semibold text-white py-4">
+        <h1 className="block text-4xl font-semibold text-white">
           CanvasAI
         </h1>
 
