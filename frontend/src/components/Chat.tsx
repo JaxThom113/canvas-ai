@@ -1,3 +1,5 @@
+/// <reference types="chrome" />
+
 import { useState } from 'react'
 import '../App.css'
 
@@ -17,13 +19,41 @@ function Chat() {
     setLoading(true);
 
     try {
+      // infer the Canvas base URL from the currently open Canvas tab
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        lastFocusedWindow: true,
+      });
+
+      // get base URL
+      let baseURL;
+      if (tab?.url) {
+        baseURL = new URL(tab.url).origin
+      }
+      else {
+        baseURL = "";
+      }
+
+      let cookieMap: Record<string, string> = {};
+      if (baseURL && chrome?.cookies?.getAll) {
+        // grab the active Canvas session cookies
+        const cookies = await chrome.cookies.getAll({ url: baseURL });
+
+        cookieMap = Object.fromEntries(
+          cookies.map((cookie) => [cookie.name, cookie.value])
+        );
+      }
+
+      // call chat/ backend endpoint, pass in message, base URL, and Canvas session cookies
       const res = await fetch("http://localhost:8000/chat", {
           method: "POST",
           headers: {
               "Content-Type": "application/json"
           },
           body: JSON.stringify({
-              message: message
+              message: message,
+              base_url: baseURL,
+              cookies: cookieMap
           })
       });
 

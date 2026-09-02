@@ -30,17 +30,22 @@ function CanvasInfo() {
       return;
     }
 
-    const currentOrigin = new URL(tab.url).origin;
-    const nextEndpoint = endpoint.trim();
+    // infer base URL from the currently open Canvas tab (i.e. https://ufl.instructure.com)
+    const baseURL = new URL(tab.url).origin;
+    setEndpoint(endpoint.trim());
 
-    setEndpoint(nextEndpoint);
+    // combine the base URL and the endpoint (i.e. "https://ufl.instructure.com" + "/api/v1/users/self/courses")
+    // endpoint first, then base URL: new URL("/api/v1/users/self/courses", "https://ufl.instructure.com")
+    const fullURL = new URL(endpoint, baseURL).href;
+
     setLoading(true);
     setResponse('');
     setStatus('Fetching...');
 
+    // access changes in Chrome from the open Canvas tab
     chrome.storage.local.set({ 
-        canvasBaseUrl: currentOrigin, 
-        canvasEndpoint: nextEndpoint 
+        canvasBaseUrl: baseURL, 
+        canvasEndpoint: fullURL 
     });
 
     try {
@@ -51,7 +56,7 @@ function CanvasInfo() {
       }
 
       // access cookies from the base URL of the currently opened Canvas tab
-      const cookies = await chrome.cookies.getAll({ url: nextEndpoint });
+      const cookies = await chrome.cookies.getAll({ url: fullURL });
       const cookieMap = Object.fromEntries(
         cookies.map((cookie) => [cookie.name, cookie.value])
       );
@@ -63,7 +68,7 @@ function CanvasInfo() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          endpoint: nextEndpoint,
+          endpoint: fullURL,
           cookies: cookieMap,
         }),
       });
@@ -123,10 +128,10 @@ function CanvasInfo() {
             <input
               id="prompt"
               name="prompt"
-              type="url"
+              type="text"
               value={endpoint}
               onChange={(e) => setEndpoint(e.target.value)}
-              placeholder="https://schoolname.instructure.com/api/v1/"
+              placeholder="api/v1/users/self/courses"
               className="block w-100 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
             />
           </div>
