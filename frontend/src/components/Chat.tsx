@@ -7,7 +7,7 @@ import '../App.css'
 */  
 
 function Chat() {
-  const [input, setInput] = useState("");
+  const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +23,7 @@ function Chat() {
               "Content-Type": "application/json"
           },
           body: JSON.stringify({
-              input: input
+              message: message
           })
       });
 
@@ -51,8 +51,8 @@ function Chat() {
               id="prompt"
               name="prompt"
               type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
               placeholder="What would you like to know?"
               autoComplete="off"
               className="block w-100 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
