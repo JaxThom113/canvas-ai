@@ -1,8 +1,12 @@
+from typing import Any
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from google.genai import errors
 from pydantic import BaseModel
 
 from services.gemini.geminiService import ask_gemini
+from services.canvas.canvasService import access_canvas
 
 
 app = FastAPI()
@@ -18,6 +22,17 @@ app.add_middleware(
 )
 
 
+@app.get("/")
+def root():
+    return {
+        "message": "CanvasAI backend is running"
+    }
+
+
+"""
+Endpoints for prompting Gemini AI through geminiService
+"""
+
 class ChatRequest(BaseModel):
     message: str
 
@@ -26,17 +41,37 @@ class ChatResponse(BaseModel):
     response: str
 
 
-@app.get("/")
-def root():
+@app.post("/chat", response_model=ChatResponse)
+def chat(request: ChatRequest):
+    try:
+        response = ask_gemini(request.message)
+    except errors.ServerError:
+        return {
+            "response": "Gemini is busy right now. Please try again in a moment."
+        }
+
     return {
-        "message": "CanvasAI backend is running"
+        "response": response
     }
 
 
-@app.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest):
+"""
+Endpoints for accessing Canvas API through canvasService
+"""
 
-    response = ask_gemini(request.message)
+class CanvasRequest(BaseModel):
+    endpoint: str = ""
+    cookies: dict[str, str] | None = None
+
+
+class CanvasResponse(BaseModel):
+    response: Any
+
+
+@app.post("/canvas", response_model=CanvasResponse)
+def canvas(request: CanvasRequest):
+    endpoint = request.endpoint or ""
+    response = access_canvas(endpoint, request.cookies)
 
     return {
         "response": response

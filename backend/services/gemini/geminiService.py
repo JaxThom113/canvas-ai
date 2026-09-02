@@ -1,8 +1,10 @@
 import os
+import time
 
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from google.genai import errors
 
 # import tools
 from services.gemini.tools.getAnnouncements import get_announcements
@@ -39,24 +41,34 @@ def ask_gemini(prompt: str):
 
     while True:
 
-        response = client.models.generate_content(
-            model = MODEL,
-            contents = contents,
-            config = types.GenerateContentConfig(
-                tools = [
-                    types.Tool(
-                        function_declarations = [
-                            get_announcements_tool,
-                            get_assignments_tool,
-                            get_calendar_events_tool,
-                            get_course_details_tool,
-                            get_courses_tool,
-                            get_course_schedule_tool
+        # try contacting Gemini 3 times
+        for attempt in range(3):
+            try:
+                response = client.models.generate_content(
+                    model = MODEL,
+                    contents = contents,
+                    config = types.GenerateContentConfig(
+                        tools = [
+                            types.Tool(
+                                function_declarations = [
+                                    get_announcements_tool,
+                                    get_assignments_tool,
+                                    get_calendar_events_tool,
+                                    get_course_details_tool,
+                                    get_courses_tool,
+                                    get_course_schedule_tool
+                                ]
+                            )
                         ]
                     )
-                ]
-            )
-        )
+                )
+                break
+            except errors.ServerError as e:
+                # 503 error means Gemini is overloaded - wait and retry
+                if e.code == 503 and attempt < 2:
+                    time.sleep(2 ** attempt)  # 1s, then 2s
+                    continue
+                raise
 
         # preserve Gemini's response
         contents.append(response.candidates[0].content)
