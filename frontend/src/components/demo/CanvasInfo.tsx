@@ -10,7 +10,6 @@ import '../../App.css'
 */
 
 function CanvasInfo() {
-  const [baseURL, setBaseURL] = useState('');
   const [endpoint, setEndpoint] = useState('');
   const [status, setStatus] = useState('');
   const [error, setError] = useState(false);
@@ -34,7 +33,6 @@ function CanvasInfo() {
     const currentOrigin = new URL(tab.url).origin;
     const nextEndpoint = endpoint.trim();
 
-    setBaseURL(currentOrigin);
     setEndpoint(nextEndpoint);
     setLoading(true);
     setResponse('');
@@ -142,10 +140,6 @@ function CanvasInfo() {
               {loading ? 'Getting endpoint data...' : 'Access API Endpoint'}
             </button>
           </div>
-
-          {baseURL && (
-            <p className="mt-3 text-xs text-gray-300">Current Canvas origin: {baseURL}</p>
-          )}
 
           {error && status && <p className="mt-4 text-sm text-red-500">{status}</p>}
           {!error && status && <p className="mt-4 text-sm text-white">{status}</p>}

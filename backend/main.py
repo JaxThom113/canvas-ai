@@ -2,6 +2,7 @@ from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from google.genai import errors
 from pydantic import BaseModel
 
 from services.gemini.geminiService import ask_gemini
@@ -42,8 +43,12 @@ class ChatResponse(BaseModel):
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
-
-    response = ask_gemini(request.message)
+    try:
+        response = ask_gemini(request.message)
+    except errors.ServerError:
+        return {
+            "response": "Gemini is busy right now. Please try again in a moment."
+        }
 
     return {
         "response": response
