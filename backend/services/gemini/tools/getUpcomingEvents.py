@@ -24,19 +24,19 @@ def get_upcoming_events(
 
     try:
         # call Canvas API (using my backend function)
-        upcoming_events = access_canvas(endpoint, cookies)
+        result = access_canvas(endpoint, cookies)
     
     except (RuntimeError, ValueError) as error:
         return {
-            "error": f"Could not fetch upcoming_events from Canvas: {error}"
+            "error": f"Could not fetch from Canvas: {error}"
         }
 
-    if not upcoming_events:
+    if not result:
         return {
-            "error": "I don't have any upcoming_events data."
+            "error": "No data was provided."
         }
 
-    return upcoming_events
+    return result
 
 
 # Gemini tool declaration

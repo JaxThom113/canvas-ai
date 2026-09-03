@@ -24,19 +24,19 @@ def get_todo(
 
     try:
         # call Canvas API (using my backend function)
-        todo = access_canvas(endpoint, cookies)
+        result = access_canvas(endpoint, cookies)
     
     except (RuntimeError, ValueError) as error:
         return {
-            "error": f"Could not fetch todo from Canvas: {error}"
+            "error": f"Could not fetch from Canvas: {error}"
         }
 
-    if not todo:
+    if not result:
         return {
-            "error": "I don't have any todo data."
+            "error": "No data was provided."
         }
 
-    return todo
+    return result
 
 
 # Gemini tool declaration
