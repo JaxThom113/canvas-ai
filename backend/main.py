@@ -35,6 +35,8 @@ Endpoints for prompting Gemini AI through geminiService
 
 class ChatRequest(BaseModel):
     message: str
+    base_url: str | None = None
+    cookies: dict[str, str] | None = None
 
 
 class ChatResponse(BaseModel):
@@ -44,7 +46,13 @@ class ChatResponse(BaseModel):
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
     try:
-        response = ask_gemini(request.message)
+        # prompt Gemini, pass in message, base URL, and Canvas session cookies
+        response = ask_gemini(
+            request.message, 
+            request.base_url, 
+            request.cookies
+        )
+
     except errors.ServerError:
         return {
             "response": "Gemini is busy right now. Please try again in a moment."
@@ -70,8 +78,12 @@ class CanvasResponse(BaseModel):
 
 @app.post("/canvas", response_model=CanvasResponse)
 def canvas(request: CanvasRequest):
-    endpoint = request.endpoint or ""
-    response = access_canvas(endpoint, request.cookies)
+    
+    # call Canvas API, pass in desired  endpoint and Canvas session cookies 
+    response = access_canvas(
+        request.endpoint or "",
+        request.cookies
+    )
 
     return {
         "response": response

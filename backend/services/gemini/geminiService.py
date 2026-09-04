@@ -1,5 +1,6 @@
 import os
 import time
+import json
 
 from dotenv import load_dotenv
 from google import genai
@@ -7,28 +8,27 @@ from google.genai import types
 from google.genai import errors
 
 # import tools
-from services.gemini.tools.getAnnouncements import get_announcements
-from services.gemini.tools.getAssignments import get_assignments
-from services.gemini.tools.getCalendarEvents import get_calendar_events
-from services.gemini.tools.getCourseDetails import get_course_details
-from services.gemini.tools.getCourses import get_courses
-from services.gemini.tools.getCourseSchedule import get_course_schedule
+from services.gemini.tools.getAnnouncements import get_announcements, get_announcements_tool
+from services.gemini.tools.getAssignments import get_assignments, get_assignments_tool
+from services.gemini.tools.getCourses import get_courses, get_courses_tool
+from services.gemini.tools.getDiscussions import get_discussions, get_discussions_tool
+from services.gemini.tools.getFiles import get_files, get_files_tool
+from services.gemini.tools.getGrades import get_grades, get_grades_tool
+from services.gemini.tools.getModules import get_modules, get_modules_tool
+from services.gemini.tools.getQuizzes import get_quizzes, get_quizzes_tool
+from services.gemini.tools.getTodo import get_todo, get_todo_tool
+from services.gemini.tools.getUpcomingEvents import get_upcoming_events, get_upcoming_events_tool
 
-from services.gemini.tools.getAnnouncements import get_announcements_tool
-from services.gemini.tools.getAssignments import get_assignments_tool
-from services.gemini.tools.getCalendarEvents import get_calendar_events_tool
-from services.gemini.tools.getCourseDetails import get_course_details_tool
-from services.gemini.tools.getCourses import get_courses_tool
-from services.gemini.tools.getCourseSchedule import get_course_schedule_tool
 
 load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 MODEL = "gemini-3.5-flash-lite"
+MAX_DISPLAY_CHARS = 10000
 
 
 # main Gemini prompting function
-def ask_gemini(prompt: str):
+def ask_gemini(prompt: str, base_url: str | None = None, cookies: dict[str, str] | None = None):
 
     contents = [
         types.Content(
@@ -53,10 +53,14 @@ def ask_gemini(prompt: str):
                                 function_declarations = [
                                     get_announcements_tool,
                                     get_assignments_tool,
-                                    get_calendar_events_tool,
-                                    get_course_details_tool,
                                     get_courses_tool,
-                                    get_course_schedule_tool
+                                    get_discussions_tool,
+                                    get_files_tool,
+                                    get_grades_tool,
+                                    get_modules_tool,
+                                    get_quizzes_tool,
+                                    get_todo_tool,
+                                    get_upcoming_events_tool
                                 ]
                             )
                         ]
@@ -87,52 +91,48 @@ def ask_gemini(prompt: str):
         function_responses = []
         for call in function_calls:
 
-            print(f"Gemini called {call.name}")
-            print("Arguments:", call.args)
-
+            called_function_debug(call.name)
+            arguments_debug(call.args)
+            
             # select the right tool function
             match call.name:
 
                 case "get_announcements":
-                    result = get_announcements(
-                        call.args.get("course_id"),
-                        call.args.get("start_date"),
-                        call.args.get("end_date"),
-                        call.args.get("important_only", False),
-                    )
+                    result = get_announcements(base_url, cookies, call.args["id"], call.args["start_date"], call.args["end_date"])
 
                 case "get_assignments":
-                    result = get_assignments(
-                        call.args.get("course_id"),
-                        call.args.get("start_date"),
-                        call.args.get("end_date"),
-                        call.args.get("include_completed", False),
-                    )
+                    result = get_assignments(base_url, cookies, call.args["id"], call.args["start_date"], call.args["end_date"])
 
-                case "get_calendar_events": 
-                    result = get_calendar_events(
-                        call.args["start_date"],
-                        call.args["end_date"],
-                    )
+                case "get_courses":
+                    result = get_courses(base_url, cookies)
 
-                case "get_course_details": 
-                    result = get_course_details(
-                        call.args["course_id"]
-                    )
+                case "get_discussions":
+                    result = get_discussions(base_url, cookies, call.args["id"])
 
-                case "get_courses": 
-                    result = get_courses()
+                case "get_files":
+                    result = get_files(base_url, cookies, call.args["id"])
 
-                case "get_course_schedule":
-                    result = get_course_schedule(
-                        call.args.get("course_id")
-                    )
+                case "get_grades":
+                    result = get_grades(base_url, cookies, call.args["id"])
+
+                case "get_modules":
+                    result = get_modules(base_url, cookies, call.args["id"])
+
+                case "get_quizzes":
+                    result = get_quizzes(base_url, cookies, call.args["id"])
+
+                case "get_todo":
+                    result = get_todo(base_url, cookies)
+
+                case "get_upcoming_events":
+                    result = get_upcoming_events(base_url, cookies)
                     
                 case _: 
                     result = { "error": f"Unknown function: {call.name}" }
 
-            print("Function result:", result)
+            function_result_debug(result)
 
+            # add resulting json to list of tool function responses to give to the agent
             function_responses.append(
                 types.Part.from_function_response(
                     name = call.name,
@@ -147,3 +147,35 @@ def ask_gemini(prompt: str):
                 parts = function_responses
             )
         )
+
+
+def called_function_debug(name):
+    # log what tool function Gemini calls
+    print("==================================================")
+    print("Gemini called:", f"\033[92m{name}\033[0m")
+
+
+def arguments_debug(args):
+    # log  arguments passed in by Gemini, limit max characters printed
+    print("\nArguments:")
+
+    arg_chars = len(args)
+
+    if arg_chars > MAX_DISPLAY_CHARS:
+        print(f"\033[93m(truncated, {arg_chars} chars)\033[0m")
+    else:
+        print(f"\033[96m({arg_chars} chars)\033[0m")
+        print(json.dumps(args, indent=2))
+
+
+def function_result_debug(result):
+    # log resulting json
+    print("\nTool function result:")
+
+    result_chars = sum(len(str(item)) for item in result)
+
+    if result_chars > MAX_DISPLAY_CHARS:
+        print(f"\033[93m(truncated, {result_chars} chars)\033[0m")
+    else:
+        print(f"\033[96m({result_chars} chars)\033[0m")
+        print(json.dumps(result, indent=2))
