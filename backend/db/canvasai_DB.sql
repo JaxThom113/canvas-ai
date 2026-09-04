@@ -13,7 +13,7 @@ CREATE TABLE login (
 -- session
 CREATE TABLE session (
     session_id     INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    account_id     INT UNSIGNED NOT NULL,
+    account_id     BIGINT UNSIGNED NOT NULL,
     session_title  VARCHAR(255) NOT NULL,
     created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_session_account
