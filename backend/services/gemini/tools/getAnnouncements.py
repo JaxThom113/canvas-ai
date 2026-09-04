@@ -1,77 +1,63 @@
-import json
-from datetime import datetime
+from urllib.parse import urlencode
 
-
-# get data from json
-with open("data/announcementsData.json", "r") as file:
-    announcements_data = json.load(file)
+# import the Canvas API client
+from services.canvas.canvasService import access_canvas
 
 
 # tool function
 def get_announcements(
-    course_id=None,
-    start_date=None,
-    end_date=None,
-    important_only=False
+    base_url: str | None = None,
+    cookies: dict[str, str] | None = None,
+    id = None,
+    start_date = None,
+    end_date = None
 ):
     """
-    Gets announcements made within a specified date range, optionally filters 
-    announcements by course and importance.
+    Returns all announcements for a class in a specified date range.
     """
 
-    announcements = announcements_data.get("announcements", [])
-
-    if not announcements:
+    if not base_url:
         return {
-            "error": "I don't have any announcement data."
+            "error": "No Canvas base URL was provided."
         }
 
-    # Convert dates if provided
-    start = datetime.fromisoformat(start_date) if start_date else None
-    end = datetime.fromisoformat(end_date) if end_date else None
+    # start with the required course filter, add dates only if provided
+    params = [("context_codes[]", f"course_{id}")]
+    if start_date:
+        params.append(("start_date", start_date))
+    if end_date:
+        params.append(("end_date", end_date))
 
-    matching_announcements = []
+    # build the full Canvas endpoint
+    endpoint = f"{base_url.rstrip('/')}/api/v1/announcements?{urlencode(params)}"
 
-    for announcement in announcements:
-
-        # filter by course if a course_id was provided
-        if course_id and announcement["course_id"] != course_id:
-            continue
-
-        # filter important announcements if requested
-        if important_only and not announcement["important"]:
-            continue
-
-        # filter by posted date
-        posted_at = datetime.fromisoformat(announcement["posted_at"])
-
-        if start and posted_at < start:
-            continue
-
-        if end and posted_at > end:
-            continue
-
-        matching_announcements.append(announcement)
-
-    # no announcements found
-    if not matching_announcements:
+    try:
+        # call Canvas API (using my backend function)
+        result = access_canvas(endpoint, cookies)
+    
+    except (RuntimeError, ValueError) as error:
         return {
-            "message": "No announcements found matching the specified criteria."
+            "error": f"Could not fetch from Canvas: {error}"
         }
 
-    return matching_announcements
+    if not result:
+        return {
+            "error": "No data was provided."
+        }
+
+    return result
 
 
 # Gemini tool declaration
 get_announcements_tool = {
     "name": "get_announcements",
-    "description": "Gets announcements posted within a specified date range. Can optionally filter announcements by course and importance.",
+    "description": "Gets all the announcements in a class in a specified date range.",
     "parameters": {
         "type": "object",
         "properties": {
-            "course_id": {
+            "id": {
                 "type": "string",
-                "description": "The Canvas course ID to filter by, such as COP4600. If omitted, announcements from all courses are returned."
+                "description": "The 7-digit id number for a class seen when accessing the /api/v1/users/self/courses Canvas API endpoint."
             },
             "start_date": {
                 "type": "string",
@@ -81,10 +67,6 @@ get_announcements_tool = {
                 "type": "string",
                 "description": "The end of the date range in ISO 8601 format, such as 2026-08-30T23:59:59."
             },
-            "important_only": {
-                "type": "boolean",
-                "description": "Whether to return only announcements marked as important."
-            }
         },
         "required": []
     }

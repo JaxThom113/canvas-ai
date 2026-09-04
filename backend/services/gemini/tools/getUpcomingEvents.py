@@ -3,12 +3,12 @@ from services.canvas.canvasService import access_canvas
 
 
 # tool function
-def get_courses(
+def get_upcoming_events(
     base_url: str | None = None, 
     cookies: dict[str, str] | None = None
 ):
     """
-    Returns all courses the student is currently enrolled in.
+    Returns the student's list of upcoming events.
     """
 
     if not base_url:
@@ -19,7 +19,7 @@ def get_courses(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        "/api/v1/users/self/courses?enrollment_state=active&per_page=100"
+        "/api/v1/users/self/upcoming_events"
     )
 
     try:
@@ -40,9 +40,9 @@ def get_courses(
 
 
 # Gemini tool declaration
-get_courses_tool = {
-    "name": "get_courses",
-    "description": "Gets all the courses the user is enrolled in.",
+get_upcoming_events_tool = {
+    "name": "get_upcoming_events",
+    "description": "Gets the list of upcoming events for the user.",
     "parameters": {
         "type": "object",
         "properties": {},
