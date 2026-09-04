@@ -3,12 +3,13 @@ from services.canvas.canvasService import access_canvas
 
 
 # tool function
-def get_courses(
+def get_discussions(
     base_url: str | None = None, 
-    cookies: dict[str, str] | None = None
+    cookies: dict[str, str] | None = None,
+    id = None,
 ):
     """
-    Returns all courses the student is currently enrolled in.
+    Returns all discussions for a class.
     """
 
     if not base_url:
@@ -19,7 +20,7 @@ def get_courses(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        "/api/v1/users/self/courses?enrollment_state=active&per_page=100"
+        f"/api/v1/courses/{id}/discussion_topics"
     )
 
     try:
@@ -40,12 +41,17 @@ def get_courses(
 
 
 # Gemini tool declaration
-get_courses_tool = {
-    "name": "get_courses",
-    "description": "Gets all the courses the user is enrolled in.",
+get_discussions_tool = {
+    "name": "get_discussions",
+    "description": "Gets all the discussions in a class.",
     "parameters": {
         "type": "object",
-        "properties": {},
+        "properties": {
+            "id": {
+                "type": "string",
+                "description": "The 7-digit id number for a class seen when accessing the /api/v1/users/self/courses Canvas API endpoint."
+            }
+        },
         "required": []
     }
 }
