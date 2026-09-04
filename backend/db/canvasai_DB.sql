@@ -6,10 +6,7 @@ USE canvas_ai;
 
 -- login
 CREATE TABLE login (
-    account_id  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    user        VARCHAR(50)  NOT NULL UNIQUE,
-    pass        VARCHAR(255) NOT NULL,   -- use hash?
-    email       VARCHAR(255) NOT NULL UNIQUE,
+    account_id  BIGINT UNSIGNED PRIMARY KEY,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
