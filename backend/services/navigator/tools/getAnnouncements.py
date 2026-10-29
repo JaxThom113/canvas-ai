@@ -48,7 +48,7 @@ def get_announcements(
     return result
 
 
-# Gemini tool declaration
+# tool declaration
 get_announcements_tool = {
     "name": "get_announcements",
     "description": "Gets all the announcements in a class in a specified date range.",

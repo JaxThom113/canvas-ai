@@ -85,7 +85,7 @@ def get_assignments(
     return result
 
 
-# Gemini tool declaration
+# tool declaration
 get_assignments_tool = {
     "name": "get_assignments",
     "description": "Gets all the assignments in a class in a specified date range.",

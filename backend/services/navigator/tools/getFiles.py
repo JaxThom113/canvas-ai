@@ -3,13 +3,13 @@ from services.canvas.canvasService import access_canvas
 
 
 # tool function
-def get_quizzes(
+def get_files(
     base_url: str | None = None, 
     cookies: dict[str, str] | None = None,
     id = None
 ):
     """
-    Returns all quizzes for a class.
+    Returns all files for a class.
     """
 
     if not base_url:
@@ -20,7 +20,7 @@ def get_quizzes(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        f"/api/v1/courses/{id}/quizzes"
+        f"/api/v1/courses/{id}/files"
     )
 
     try:
@@ -40,10 +40,10 @@ def get_quizzes(
     return result
 
 
-# Gemini tool declaration
-get_quizzes_tool = {
-    "name": "get_quizzes",
-    "description": "Gets all the quizzes in a class.",
+# tool declaration
+get_files_tool = {
+    "name": "get_files",
+    "description": "Gets all the files in a class.",
     "parameters": {
         "type": "object",
         "properties": {

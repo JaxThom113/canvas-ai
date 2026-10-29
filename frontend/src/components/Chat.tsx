@@ -5,7 +5,7 @@ import '../App.css'
 
 /*
     This component accepts is a main chat used in the extension
-    to interface with Gemini
+    to interface with NaviGator
 */  
 
 function Chat() {

@@ -3,13 +3,13 @@ from services.canvas.canvasService import access_canvas
 
 
 # tool function
-def get_grades(
+def get_modules(
     base_url: str | None = None, 
     cookies: dict[str, str] | None = None,
     id = None
 ):
     """
-    Returns all grades for a class.
+    Returns all modules for a class.
     """
 
     if not base_url:
@@ -20,7 +20,7 @@ def get_grades(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        f"/api/v1/courses/{id}/enrollments"
+        f"/api/v1/courses/{id}/modules"
     )
 
     try:
@@ -40,10 +40,10 @@ def get_grades(
     return result
 
 
-# Gemini tool declaration
-get_grades_tool = {
-    "name": "get_grades",
-    "description": "Gets all the grades in a class.",
+# tool declaration
+get_modules_tool = {
+    "name": "get_modules",
+    "description": "Gets all the modules in a class.",
     "parameters": {
         "type": "object",
         "properties": {

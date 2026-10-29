@@ -3,13 +3,12 @@ from services.canvas.canvasService import access_canvas
 
 
 # tool function
-def get_files(
+def get_todo(
     base_url: str | None = None, 
-    cookies: dict[str, str] | None = None,
-    id = None
+    cookies: dict[str, str] | None = None
 ):
     """
-    Returns all files for a class.
+    Returns the student's todo list.
     """
 
     if not base_url:
@@ -20,7 +19,7 @@ def get_files(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        f"/api/v1/courses/{id}/files"
+        "/api/v1/users/self/todo"
     )
 
     try:
@@ -40,18 +39,13 @@ def get_files(
     return result
 
 
-# Gemini tool declaration
-get_files_tool = {
-    "name": "get_files",
-    "description": "Gets all the files in a class.",
+# tool declaration
+get_todo_tool = {
+    "name": "get_todo",
+    "description": "Gets the todo list of the user.",
     "parameters": {
         "type": "object",
-        "properties": {
-            "id": {
-                "type": "string",
-                "description": "The 7-digit id number for a class seen when accessing the /api/v1/users/self/courses Canvas API endpoint."
-            }
-        },
+        "properties": {},
         "required": []
     }
 }

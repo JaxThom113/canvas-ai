@@ -3,13 +3,13 @@ from services.canvas.canvasService import access_canvas
 
 
 # tool function
-def get_discussions(
+def get_quizzes(
     base_url: str | None = None, 
     cookies: dict[str, str] | None = None,
-    id = None,
+    id = None
 ):
     """
-    Returns all discussions for a class.
+    Returns all quizzes for a class.
     """
 
     if not base_url:
@@ -20,7 +20,7 @@ def get_discussions(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        f"/api/v1/courses/{id}/discussion_topics"
+        f"/api/v1/courses/{id}/quizzes"
     )
 
     try:
@@ -40,10 +40,10 @@ def get_discussions(
     return result
 
 
-# Gemini tool declaration
-get_discussions_tool = {
-    "name": "get_discussions",
-    "description": "Gets all the discussions in a class.",
+# tool declaration
+get_quizzes_tool = {
+    "name": "get_quizzes",
+    "description": "Gets all the quizzes in a class.",
     "parameters": {
         "type": "object",
         "properties": {

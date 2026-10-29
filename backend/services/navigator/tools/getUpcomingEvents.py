@@ -39,7 +39,7 @@ def get_upcoming_events(
     return result
 
 
-# Gemini tool declaration
+# tool declaration
 get_upcoming_events_tool = {
     "name": "get_upcoming_events",
     "description": "Gets the list of upcoming events for the user.",
