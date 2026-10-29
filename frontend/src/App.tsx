@@ -1,9 +1,13 @@
+import { useState } from 'react'
 import './App.css'
 
 import Chat from './components/Chat';
 import CanvasInfo from './components/demo/CanvasInfo';
+import DBInterface from './components/demo/DBInterface';
 
 function App() {
+  const [showDbInterface, setShowDbInterface] = useState(false);
+
   return (
     <>
       <div className="flex flex-col items-center justify-center isolate p-6 bg-gray-900 sm:py-10 lg:px-30">
@@ -27,6 +31,18 @@ function App() {
         <Chat />
 
         <CanvasInfo />
+
+        <div className="mt-6">
+          <button
+            type="button"
+            onClick={() => setShowDbInterface((prev) => !prev)}
+            className="block rounded-md bg-white/10 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+          >
+            {showDbInterface ? 'Hide DB Test Interface' : 'Show DB Test Interface'}
+          </button>
+        </div>
+
+        {showDbInterface && <DBInterface />}
 
       </div>
     </>
