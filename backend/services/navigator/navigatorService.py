@@ -27,6 +27,18 @@ client = OpenAI(
 MODEL = os.getenv("NAVIGATOR_MODEL")
 MAX_DISPLAY_CHARS = 10000
 
+# let NaviGator know to respond with Markdown for the fronted to display
+MARKDOWN_PROMPT = (
+    """
+    Format every response as GitHub-flavored Markdown. Use real Markdown 
+    tables (with a header row and | --- | separator) for tabular data, 
+    -/1. lists for lists, **bold** and *italics* for emphasis, headings 
+    for sections, and [text](url) for links. Never draw tables with 
+    spaces, tabs, or ASCII characters, and do not wrap tables or normal 
+    text in code blocks. Use code blocks only for actual code.
+    """
+)
+
 # wrap each tool declaration in the OpenAI-style function format
 TOOLS = [
     {"type": "function", "function": tool}
@@ -48,7 +60,9 @@ TOOLS = [
 # main NaviGator prompting function
 def ask_navigator(prompt: str, base_url: str | None = None, cookies: dict[str, str] | None = None):
 
+    # prompts to be sent to NaviGator
     messages = [
+        {"role": "system", "content": MARKDOWN_PROMPT},
         {"role": "user", "content": prompt}
     ]
 

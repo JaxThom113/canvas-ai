@@ -1,11 +1,11 @@
 /// <reference types="chrome" />
 
 import { useState } from 'react'
+import Response from './Response'
 import '../App.css'
 
-
 /*
-    This component accepts is a main chat used in the extension
+    This component is the main chat used in the extension
     to interface with NaviGator
 */  
 
@@ -129,11 +129,8 @@ function Chat() {
 
           </div>
 
-          {response && (
-            <div className="mt-6 max-w-2xl whitespace-pre-wrap rounded-md border border-gray-200 bg-white p-4 text-left text-gray-900">
-              {response}
-            </div>
-          )}
+          {/* Pass in the response variable as a prop for the Response component to display */}
+          <Response response={response} />
 
         </form>
       </div>
