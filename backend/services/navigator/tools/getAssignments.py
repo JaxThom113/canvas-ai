@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 # import the Canvas API client
 from services.canvas.canvasService import access_canvas
+from services.canvas.canvasJsonParser import parse_canvas_json
 
 
 def _to_dt(value):
@@ -82,7 +83,8 @@ def get_assignments(
 
         result = filtered
 
-    return result
+    # trim the raw Canvas JSON down to what NaviGator needs
+    return parse_canvas_json("assignments", result)
 
 
 # tool declaration

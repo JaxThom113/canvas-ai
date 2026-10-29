@@ -164,7 +164,7 @@ def function_result_debug(result):
     # log resulting json
     print("\nTool function result:")
 
-    result_chars = sum(len(str(item)) for item in result)
+    result_chars = len(json.dumps(result, default=str))
 
     if result_chars > MAX_DISPLAY_CHARS:
         print(f"\033[93m(truncated, {result_chars} chars)\033[0m")
