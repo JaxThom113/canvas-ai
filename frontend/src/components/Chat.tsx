@@ -1,10 +1,11 @@
 /// <reference types="chrome" />
 
 import { useState } from 'react'
+import Response from './Response'
 import '../App.css'
 
 /*
-    This component accepts is a main chat used in the extension
+    This component is the main chat used in the extension
     to interface with NaviGator
 */  
 
@@ -12,6 +13,18 @@ function Chat() {
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // list of prompts that can be displayed above the text field
+  const prompts = [
+    'Ask a question!',
+    'What can I help you find?',
+    'What would you like to know?',
+    'Need help looking for something?',
+    'What are you looking for today?',
+  ]
+  const [prompt] = useState(
+    () => prompts[Math.floor(Math.random() * prompts.length)]
+  );
 
   async function sendMessage(event: React.FormEvent<HTMLFormElement>) 
   {
@@ -73,37 +86,52 @@ function Chat() {
     <>
       <div className="mt-6">
         <form onSubmit={sendMessage} className="flex flex-col items-center">
-          <label htmlFor="prompt" className="block text-sm/6 font-semibold text-white">
-            Ask a question!
+          
+          <label htmlFor="prompt" className="block text-sm/6 font-semibold text-gray-900">
+            {prompt}
           </label>
-          <div className="mt-2.5">
-            <input
+
+          <div className="relative mt-2.5 w-100 max-w-full">
+
+            <textarea
               id="prompt"
               name="prompt"
-              type="text"
+              rows={1}
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="What would you like to know?"
+              onChange={(event) => {
+                setMessage(event.target.value);
+                event.target.style.height = '0px';
+                event.target.style.height = `${event.target.scrollHeight}px`;
+              }}
+              placeholder="Type your message..."
               autoComplete="off"
-              className="block w-100 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+              className="block min-h-12 w-full resize-none overflow-hidden rounded-2xl bg-white py-2 pl-3.5 pr-14 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
             />
-          </div>
 
-          <div className="mt-6">
             <button
               type="submit"
               disabled={loading}
-              className="block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+              aria-label={loading ? 'Waiting for response' : 'Send message'}
+              className="absolute bottom-2 right-2 flex size-8 items-center justify-center rounded-full bg-indigo-500 text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? 'Submitting...' : 'Submit'}
+              {loading ? (
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="size-5 animate-spin">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.3" strokeWidth="3" />
+                  <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeLinecap="round" strokeWidth="3" />
+                </svg>
+              ) : (
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+                  <path d="M12 19V5" />
+                  <path d="m5 12 7-7 7 7" />
+                </svg>
+              )}
             </button>
+
           </div>
 
-          {response && (
-            <div className="mt-6 max-w-2xl whitespace-pre-wrap rounded-md bg-white/10 p-4 text-left text-white">
-              {response}
-            </div>
-          )}
+          {/* Pass in the response variable as a prop for the Response component to display */}
+          <Response response={response} />
+
         </form>
       </div>
     </>
