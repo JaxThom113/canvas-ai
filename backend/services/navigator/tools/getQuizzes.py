@@ -1,15 +1,16 @@
 # import the Canvas API client
 from services.canvas.canvasService import access_canvas
+from services.canvas.canvasJsonParser import parse_canvas_json
 
 
 # tool function
-def get_modules(
+def get_quizzes(
     base_url: str | None = None, 
     cookies: dict[str, str] | None = None,
     id = None
 ):
     """
-    Returns all modules for a class.
+    Returns all quizzes for a class.
     """
 
     if not base_url:
@@ -20,7 +21,7 @@ def get_modules(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        f"/api/v1/courses/{id}/modules"
+        f"/api/v1/courses/{id}/quizzes"
     )
 
     try:
@@ -37,13 +38,14 @@ def get_modules(
             "error": "No data was provided."
         }
 
-    return result
+    # trim the raw Canvas JSON down to what NaviGator needs
+    return parse_canvas_json("quizzes", result)
 
 
-# Gemini tool declaration
-get_modules_tool = {
-    "name": "get_modules",
-    "description": "Gets all the modules in a class.",
+# tool declaration
+get_quizzes_tool = {
+    "name": "get_quizzes",
+    "description": "Gets all the quizzes in a class.",
     "parameters": {
         "type": "object",
         "properties": {

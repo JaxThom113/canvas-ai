@@ -2,9 +2,6 @@ import json
 from typing import Any
 from urllib import error, request
 
-# import JSON parser
-from services.canvas.canvasJsonParser import parse_canvas_json
-
 
 # main function for interfacing with Canvas API
 def access_canvas(endpoint: str, cookies: dict[str, str] | None = None) -> Any:
@@ -15,8 +12,6 @@ def access_canvas(endpoint: str, cookies: dict[str, str] | None = None) -> Any:
     # ensure endpoint given from frontend is not empty
     if not endpoint or not endpoint.strip():
         raise ValueError("A Canvas endpoint must be provided.")
-
-    parse_canvas_json()
 
     # tell Canvas a JSON is needed as response
     headers = {

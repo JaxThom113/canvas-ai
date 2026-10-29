@@ -1,14 +1,16 @@
 # import the Canvas API client
 from services.canvas.canvasService import access_canvas
+from services.canvas.canvasJsonParser import parse_canvas_json
 
 
 # tool function
-def get_courses(
+def get_modules(
     base_url: str | None = None, 
-    cookies: dict[str, str] | None = None
+    cookies: dict[str, str] | None = None,
+    id = None
 ):
     """
-    Returns all courses the student is currently enrolled in.
+    Returns all modules for a class.
     """
 
     if not base_url:
@@ -19,7 +21,7 @@ def get_courses(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        "/api/v1/users/self/courses?enrollment_state=active&per_page=100"
+        f"/api/v1/courses/{id}/modules"
     )
 
     try:
@@ -36,16 +38,22 @@ def get_courses(
             "error": "No data was provided."
         }
 
-    return result
+    # trim the raw Canvas JSON down to what NaviGator needs
+    return parse_canvas_json("modules", result)
 
 
-# Gemini tool declaration
-get_courses_tool = {
-    "name": "get_courses",
-    "description": "Gets all the courses the user is enrolled in.",
+# tool declaration
+get_modules_tool = {
+    "name": "get_modules",
+    "description": "Gets all the modules in a class.",
     "parameters": {
         "type": "object",
-        "properties": {},
+        "properties": {
+            "id": {
+                "type": "string",
+                "description": "The 7-digit id number for a class seen when accessing the /api/v1/users/self/courses Canvas API endpoint."
+            }
+        },
         "required": []
     }
 }
