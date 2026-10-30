@@ -26,7 +26,8 @@ async function readErrorDetail(res: Response): Promise<string> {
     }
 
     return `Request failed: ${res.status} ${res.statusText}`
-  } catch {
+  } 
+  catch {
     return `Request failed: ${res.status} ${res.statusText}`
   }
 }
@@ -66,21 +67,25 @@ function LoginSeedForm() {
 
       setStatus('Account created.')
       setError(false)
-    } catch (err) {
+    } 
+    catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setStatus('Error: ' + message)
       setError(true)
-    } finally {
+    } 
+    finally {
       setLoading(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col items-center mt-6">
-      <h3 className="text-lg font-semibold text-white">Login</h3>
+    <form onSubmit={handleSubmit} className="mt-6 flex w-100 max-w-full flex-col items-center">
+      <label htmlFor="prompt" className="block text-sm/6 font-semibold text-gray-900">
+        Login
+      </label>
 
-      <div className="mt-2.5">
-        <label htmlFor="login-account-id" className="block text-sm/6 font-semibold text-white">
+      <div className="mt-2.5 w-full">
+        <label htmlFor="login-account-id" className="block text-sm/6 font-semibold text-gray-900">
           account_id
         </label>
         <input
@@ -88,7 +93,8 @@ function LoginSeedForm() {
           type="number"
           value={accountId}
           onChange={(e) => setAccountId(e.target.value)}
-          className="mt-1 block w-64 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+          placeholder="12345"
+          className="mt-1 block w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
         />
       </div>
 
@@ -96,14 +102,14 @@ function LoginSeedForm() {
         <button
           type="submit"
           disabled={loading}
-          className="block rounded-md bg-orange-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+          className="block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Saving...' : 'Save'}
         </button>
       </div>
 
-      {error && status && <p className="mt-3 text-sm text-red-500">{status}</p>}
-      {!error && status && <p className="mt-3 text-sm text-white">{status}</p>}
+      {error && status && <p className="mt-3 text-sm text-red-600">{status}</p>}
+      {!error && status && <p className="mt-3 text-sm text-gray-700">{status}</p>}
     </form>
   )
 }
@@ -176,11 +182,13 @@ function SessionSeedForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col items-center mt-8">
-      <h3 className="text-lg font-semibold text-white">Session</h3>
+    <form onSubmit={handleSubmit} className="mt-8 flex w-100 max-w-full flex-col items-center">
+      <label htmlFor="prompt" className="block text-sm/6 font-semibold text-gray-900">
+        Session
+      </label>
 
-      <div className="mt-2.5">
-        <label htmlFor="session-account-id" className="block text-sm/6 font-semibold text-white">
+      <div className="mt-2.5 w-full">
+        <label htmlFor="session-account-id" className="block text-sm/6 font-semibold text-gray-900">
           account_id
         </label>
         <input
@@ -188,12 +196,13 @@ function SessionSeedForm() {
           type="number"
           value={accountId}
           onChange={(e) => setAccountId(e.target.value)}
-          className="mt-1 block w-64 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+          placeholder="12345"
+          className="mt-1 block w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
         />
       </div>
 
-      <div className="mt-2.5">
-        <label htmlFor="session-id" className="block text-sm/6 font-semibold text-white">
+      <div className="mt-2.5 w-full">
+        <label htmlFor="session-id" className="block text-sm/6 font-semibold text-gray-900">
           session_id
         </label>
         <input
@@ -202,12 +211,12 @@ function SessionSeedForm() {
           value={sessionId}
           onChange={(e) => setSessionId(e.target.value)}
           placeholder="auto"
-          className="mt-1 block w-64 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+          className="mt-1 block w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
         />
       </div>
 
-      <div className="mt-2.5">
-        <label htmlFor="session-title" className="block text-sm/6 font-semibold text-white">
+      <div className="mt-2.5 w-full">
+        <label htmlFor="session-title" className="block text-sm/6 font-semibold text-gray-900">
           session_title
         </label>
         <input
@@ -215,7 +224,8 @@ function SessionSeedForm() {
           type="text"
           value={sessionTitle}
           onChange={(e) => setSessionTitle(e.target.value)}
-          className="mt-1 block w-64 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+          placeholder="12345"
+          className="mt-1 block w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
         />
       </div>
 
@@ -223,14 +233,14 @@ function SessionSeedForm() {
         <button
           type="submit"
           disabled={loading}
-          className="block rounded-md bg-orange-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+          className="block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Saving...' : 'Save'}
         </button>
       </div>
 
-      {error && status && <p className="mt-3 text-sm text-red-500">{status}</p>}
-      {!error && status && <p className="mt-3 text-sm text-white">{status}</p>}
+      {error && status && <p className="mt-3 text-sm text-red-600">{status}</p>}
+      {!error && status && <p className="mt-3 text-sm text-gray-700">{status}</p>}
     </form>
   )
 }
@@ -267,7 +277,8 @@ function ChatSeedForm() {
     let parsedMessage: unknown
     try {
       parsedMessage = JSON.parse(message)
-    } catch {
+    } 
+    catch {
       setStatus('Invalid JSON in message field.')
       setError(true)
       return
@@ -277,7 +288,8 @@ function ChatSeedForm() {
     if (response.trim()) {
       try {
         parsedResponse = JSON.parse(response)
-      } catch {
+      } 
+      catch {
         setStatus('Invalid JSON in response field.')
         setError(true)
         return
@@ -309,21 +321,25 @@ function ChatSeedForm() {
       const data = await res.json()
       setStatus(`Chat created (chat_id=${data.chat_id}).`)
       setError(false)
-    } catch (err) {
+    } 
+    catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setStatus('Error: ' + message)
       setError(true)
-    } finally {
+    } 
+    finally {
       setLoading(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col items-center mt-8">
-      <h3 className="text-lg font-semibold text-white">Chat</h3>
+    <form onSubmit={handleSubmit} className="mt-8 flex w-100 max-w-full flex-col items-center">
+      <label htmlFor="prompt" className="block text-sm/6 font-semibold text-gray-900">
+        Chat
+      </label>
 
-      <div className="mt-2.5">
-        <label htmlFor="chat-session-id" className="block text-sm/6 font-semibold text-white">
+      <div className="mt-2.5 w-full">
+        <label htmlFor="chat-session-id" className="block text-sm/6 font-semibold text-gray-900">
           session_id
         </label>
         <input
@@ -331,12 +347,13 @@ function ChatSeedForm() {
           type="number"
           value={sessionId}
           onChange={(e) => setSessionId(e.target.value)}
-          className="mt-1 block w-64 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+          placeholder="12345"
+          className="mt-1 block w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
         />
       </div>
 
-      <div className="mt-2.5">
-        <label htmlFor="chat-id" className="block text-sm/6 font-semibold text-white">
+      <div className="mt-2.5 w-full">
+        <label htmlFor="chat-id" className="block text-sm/6 font-semibold text-gray-900">
           chat_id
         </label>
         <input
@@ -345,12 +362,12 @@ function ChatSeedForm() {
           value={chatId}
           onChange={(e) => setChatId(e.target.value)}
           placeholder="auto"
-          className="mt-1 block w-64 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+          className="mt-1 block w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
         />
       </div>
 
-      <div className="mt-2.5">
-        <label htmlFor="chat-message" className="block text-sm/6 font-semibold text-white">
+      <div className="mt-2.5 w-full">
+        <label htmlFor="chat-message" className="block text-sm/6 font-semibold text-gray-900">
           message (JSON)
         </label>
         <textarea
@@ -359,12 +376,12 @@ function ChatSeedForm() {
           onChange={(e) => setMessage(e.target.value)}
           placeholder='{"text": "hello"}'
           rows={3}
-          className="mt-1 block w-64 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+          className="mt-1 block w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
         />
       </div>
 
-      <div className="mt-2.5">
-        <label htmlFor="chat-response" className="block text-sm/6 font-semibold text-white">
+      <div className="mt-2.5 w-full">
+        <label htmlFor="chat-response" className="block text-sm/6 font-semibold text-gray-900">
           response (JSON, optional)
         </label>
         <textarea
@@ -373,7 +390,7 @@ function ChatSeedForm() {
           onChange={(e) => setResponse(e.target.value)}
           placeholder='{"text": "hi there"}'
           rows={3}
-          className="mt-1 block w-64 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+          className="mt-1 block w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
         />
       </div>
 
@@ -381,22 +398,24 @@ function ChatSeedForm() {
         <button
           type="submit"
           disabled={loading}
-          className="block rounded-md bg-orange-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+          className="block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Saving...' : 'Save'}
         </button>
       </div>
 
-      {error && status && <p className="mt-3 text-sm text-red-500">{status}</p>}
-      {!error && status && <p className="mt-3 text-sm text-white">{status}</p>}
+      {error && status && <p className="mt-3 text-sm text-red-600">{status}</p>}
+      {!error && status && <p className="mt-3 text-sm text-gray-700">{status}</p>}
     </form>
   )
 }
 
 function DBInterface() {
   return (
-    <div className="mt-6 flex flex-col items-center rounded-md bg-white/5 p-6">
-      <h2 className="text-2xl font-semibold text-white">Test DB Interface</h2>
+    <div className="mt-6 flex w-full max-w-2xl flex-col items-center rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <h3 className="text-2xl font-semibold text-gray-900">
+        Test DB Interface
+      </h3>
 
       <LoginSeedForm />
       <SessionSeedForm />
