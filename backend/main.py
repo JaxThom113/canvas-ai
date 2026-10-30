@@ -11,6 +11,8 @@ from services.navigator.navigatorService import ask_navigator
 from services.canvas.canvasService import access_canvas
 from app.db import insert_login, insert_session, insert_chat
 
+from db.chatStorage import create_session, save_chat
+
 
 app = FastAPI()
 
@@ -48,10 +50,12 @@ class ChatRequest(BaseModel):
     message: str
     base_url: str | None = None
     cookies: dict[str, str] | None = None
+    session_id: int | None = None
 
 
 class ChatResponse(BaseModel):
     response: str
+    session_id: int | None = None
 
 
 @app.post("/chat", response_model=ChatResponse)
@@ -69,6 +73,19 @@ def chat(request: ChatRequest):
         return {
             "response": "NaviGator is busy right now. Please try again in a moment."
         }
+
+    session_id = request.session_id
+    try:
+        if session_id is None:
+            session_id = create_session(account_id=1, title=request.message[:255])
+        save_chat(session_id, request.message, response)
+    except Exception as e:
+        print(f"Error saving chat: {e}")
+
+    return {
+        "response": response,
+        "session_id": session_id
+    }
 
     return {
         "response": response

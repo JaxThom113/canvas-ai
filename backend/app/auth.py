@@ -65,3 +65,22 @@ def verify_login(account_id: int) -> bool:
     finally:
         if conn is not None:
             conn.close()
+
+
+def login(account_id: int) -> bool:
+    # first login for this account creates its row
+    if verify_login(account_id):
+        return True
+    return create_account(account_id)
+
+
+if __name__ == "__main__":
+    # sign up
+    success = create_account(123456)
+    print("Account created:", success)
+
+    # login
+    if verify_login(123456):
+        print("Login successful!")
+    else:
+        print("Login failed.")

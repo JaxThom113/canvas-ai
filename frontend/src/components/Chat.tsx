@@ -13,6 +13,7 @@ function Chat() {
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState<number | null>(null);
 
   // list of prompts that can be displayed above the text field
   const prompts = [
@@ -66,12 +67,14 @@ function Chat() {
           body: JSON.stringify({
               message: message,
               base_url: baseURL,
-              cookies: cookieMap
+              cookies: cookieMap,
+              session_id: sessionId
           })
       });
 
       const data = await res.json();
       setResponse(data.response);
+      if (data.session_id != null) setSessionId(data.session_id);
     } 
     catch (error) {
       console.error(error);
