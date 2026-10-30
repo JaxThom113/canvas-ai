@@ -97,6 +97,16 @@ function Chat() {
               id="prompt"
               name="prompt"
               rows={1}
+              onKeyDown={(event) => {
+                if (
+                  event.key === 'Enter' &&
+                  !event.shiftKey &&
+                  !event.nativeEvent.isComposing
+                ) {
+                  event.preventDefault();
+                  event.currentTarget.form?.requestSubmit();
+                }
+              }}
               value={message}
               onChange={(event) => {
                 setMessage(event.target.value);

@@ -3,6 +3,7 @@ from typing import Any
 import mariadb
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from openai import APIStatusError
 from pydantic import BaseModel
 
@@ -22,6 +23,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Unhandled DB errors (bad credentials, unreachable host, ...) would otherwise
+# become a bare 500 without CORS headers, which the browser reports as
+# "Failed to fetch". Return JSON so the real message shows up in the UI.
+@app.exception_handler(mariadb.Error)
+def mariadb_error_handler(request, exc: mariadb.Error):
+    return JSONResponse(status_code=500, content={"detail": f"Database error: {exc}"})
 
 
 @app.get("/")
