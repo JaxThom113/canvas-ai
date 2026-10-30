@@ -1,7 +1,8 @@
 import './App.css'
 
 import Chat from './components/Chat';
-// import CanvasInfo from './components/demo/CanvasInfo';
+import CanvasInfo from './components/demo/CanvasInfo';
+import DBInterface from './components/demo/DBInterface';
 import canvyLogoFull from './assets/canvy_logo_full.png'
 
 function App() {
@@ -29,7 +30,9 @@ function App() {
 
         <Chat />
 
-        {/* <CanvasInfo /> */}
+        {/* Demo/testing components */}
+        <CanvasInfo />
+        <DBInterface />
 
       </div>
     </>
