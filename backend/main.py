@@ -3,10 +3,10 @@ from typing import Any
 import mariadb
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from google.genai import errors
+from openai import APIStatusError
 from pydantic import BaseModel
 
-from services.gemini.geminiService import ask_gemini
+from services.navigator.navigatorService import ask_navigator
 from services.canvas.canvasService import access_canvas
 from app.db import insert_login, insert_session, insert_chat
 
@@ -32,7 +32,7 @@ def root():
 
 
 """
-Endpoints for prompting Gemini AI through geminiService
+Endpoints for prompting NaviGator AI through navigatorService
 """
 
 class ChatRequest(BaseModel):
@@ -48,16 +48,17 @@ class ChatResponse(BaseModel):
 @app.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
     try:
-        # prompt Gemini, pass in message, base URL, and Canvas session cookies
-        response = ask_gemini(
+        # prompt NaviGator and the desired model 
+        # pass in message, base URL, and Canvas session cookies
+        response = ask_navigator(
             request.message, 
             request.base_url, 
             request.cookies
         )
 
-    except errors.ServerError:
+    except APIStatusError:
         return {
-            "response": "Gemini is busy right now. Please try again in a moment."
+            "response": "NaviGator is busy right now. Please try again in a moment."
         }
 
     return {

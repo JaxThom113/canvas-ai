@@ -1,14 +1,15 @@
 # import the Canvas API client
 from services.canvas.canvasService import access_canvas
+from services.canvas.canvasJsonParser import parse_canvas_json
 
 
 # tool function
-def get_upcoming_events(
+def get_courses(
     base_url: str | None = None, 
     cookies: dict[str, str] | None = None
 ):
     """
-    Returns the student's list of upcoming events.
+    Returns all courses the student is currently enrolled in.
     """
 
     if not base_url:
@@ -19,7 +20,7 @@ def get_upcoming_events(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        "/api/v1/users/self/upcoming_events"
+        "/api/v1/users/self/courses?enrollment_state=active&per_page=100"
     )
 
     try:
@@ -36,13 +37,14 @@ def get_upcoming_events(
             "error": "No data was provided."
         }
 
-    return result
+    # trim the raw Canvas JSON down to what NaviGator needs
+    return parse_canvas_json("courses", result)
 
 
-# Gemini tool declaration
-get_upcoming_events_tool = {
-    "name": "get_upcoming_events",
-    "description": "Gets the list of upcoming events for the user.",
+# tool declaration
+get_courses_tool = {
+    "name": "get_courses",
+    "description": "Gets all the courses the user is enrolled in.",
     "parameters": {
         "type": "object",
         "properties": {},
