@@ -224,7 +224,7 @@ function SessionSeedForm() {
           type="text"
           value={sessionTitle}
           onChange={(e) => setSessionTitle(e.target.value)}
-          placeholder="12345"
+          placeholder="What classes am I in?"
           className="mt-1 block w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
         />
       </div>
