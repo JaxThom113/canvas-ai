@@ -71,3 +71,48 @@ def get_chats(session_id: int) -> list[dict]:
         row["message"] = json.loads(row["message"])
         row["response"] = json.loads(row["response"]) if row["response"] else None
     return rows
+
+def get_content(stored: str | None) -> str:
+    if not stored:
+        return ""
+
+    value = json.loads(stored)
+    if isinstance(value, dict):
+        return str(value.get("content", ""))
+    
+    return value if isinstance(value, str) else json.dumps(value)
+
+def get_sessions(account_id: int) -> list[dict]:
+    conn = get_connection()
+    try:
+        with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            cursor.execute(
+                "SELECT session_id, session_title, created_at FROM session "
+                "WHERE account_id = %s ORDER BY created_at DESC, session_id DESC",
+                (account_id,),
+            )
+            sessions = list(cursor.fetchall())
+
+            cursor.execute(
+                "SELECT chat.chat_id, chat.session_id, chat.message, chat.response, chat.created_at "
+                "FROM chat JOIN session ON chat.session_id = session.session_id "
+                "WHERE session.account_id = %s ORDER BY chat.created_at, chat.chat_id",
+                (account_id,),
+            )
+            chats = cursor.fetchall()
+    finally:
+        conn.close()
+
+    chats_by_session = {session["session_id"]: [] for session in sessions}
+    for chat in chats:
+        chats_by_session[chat["session_id"]].append({
+            "chat_id": chat["chat_id"],
+            "message": get_content(chat["message"]),
+            "response": get_content(chat["response"]),
+            "created_at": chat["created_at"],
+        })
+
+    for session in sessions:
+        session["chats"] = chats_by_session[session["session_id"]]
+    
+    return sessions

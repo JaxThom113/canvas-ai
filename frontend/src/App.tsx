@@ -1,43 +1,73 @@
 import './App.css'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import Chat from './components/Chat';
 import Login from './components/Login';
 import CreateAccount from './components/CreateAccount';
 import AccountButton from './components/AccountButton';
 import Logout from './components/Logout';
+import Sidebar from './components/Sidebar';
 import { loadUser, saveUser, clearUser, type User } from './auth';
+import type { HistoryChat } from './history';
+import canvyLogoFull from './assets/canvy_logo_full.png'
 // import CanvasInfo from './components/demo/CanvasInfo';
 // import DBInterface from './components/demo/DBInterface';
-import canvyLogoFull from './assets/canvy_logo_full.png'
 
 function App() {
+  // view/page states
   const [view, setView] = useState<'chat' | 'login' | 'signup'>('chat');
   const [user, setUser] = useState<User | null>(loadUser);
   const [confirmingLogout, setConfirmingLogout] = useState(false);
 
-  // one session per opening of the extension. It stays null until the first
-  // message is sent, so no session is created if nothing is sent
+  // sessions/chats/history states
   const [sessionId, setSessionId] = useState<number | null>(null);
+  const [viewedChat, setViewedChat] = useState<HistoryChat | null>(null);
+  const [historyVersion, setHistoryVersion] = useState(0);
+  const [chatKey, setChatKey] = useState(0);
 
   function handleLogin(loggedInUser: User) {
     saveUser(loggedInUser);
     setUser(loggedInUser);
     setSessionId(null);
+    setViewedChat(null);
     setView('chat');
   }
 
-  function handleLogout() {
+  const handleLogout = useCallback(() => {
     clearUser();
     setUser(null);
     setSessionId(null);
+    setViewedChat(null);
     setConfirmingLogout(false);
+    setView('chat');
+  }, []);
+
+  function handleChatSaved(newSessionId: number) {
+    setSessionId(newSessionId);
+    setHistoryVersion((version) => version + 1);
+  }
+
+  function handleNewChat() {
+    setSessionId(null);
+    setViewedChat(null);
+    setChatKey((key) => key + 1);
     setView('chat');
   }
 
   return (
-    <>
-      <div className="flex flex-col items-center justify-start isolate bg-linear-to-br from-white via-white to-gray-100 p-6 sm:py-10 lg:px-30">
+    <div className="flex bg-linear-to-br from-white via-white to-gray-100">
+      {user && (
+        <Sidebar
+          token={user.token}
+          refreshKey={historyVersion}
+          activeChatId={viewedChat?.chat_id ?? null}
+          onSelectChat={setViewedChat}
+          onNewChat={handleNewChat}
+          onLoginExpired={handleLogout}
+        />
+      )}
+
+      <div className="flex min-w-0 flex-1 flex-col items-center justify-start isolate p-6 sm:py-10 lg:px-30">
         <div
           aria-hidden="true"
           className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
@@ -63,9 +93,11 @@ function App() {
         {/* Handle which page/view/popup to show (Chat, Login, CreateAccount, Logout) */}
         {view === 'chat' && (
           <Chat
+            key={chatKey}
             token={user?.token ?? null}
             sessionId={sessionId}
-            onSessionId={setSessionId}
+            viewedChat={viewedChat}
+            onSessionId={handleChatSaved}
             onLoginExpired={handleLogout}
           />
         )}
@@ -92,7 +124,7 @@ function App() {
         {/* <DBInterface /> */}
 
       </div>
-    </>
+    </div>
   )
 }
 

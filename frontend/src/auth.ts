@@ -1,6 +1,5 @@
 /*
-    Helpers for the logged in user. The user is kept in localStorage so they
-    stay logged in between openings of the extension
+    Helpers for the logged in user kept in localstorage
 */
 
 export type User = {
