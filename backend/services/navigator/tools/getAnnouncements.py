@@ -2,6 +2,7 @@ from urllib.parse import urlencode
 
 # import the Canvas API client
 from services.canvas.canvasService import access_canvas
+from services.canvas.canvasJsonParser import parse_canvas_json
 
 
 # tool function
@@ -45,10 +46,11 @@ def get_announcements(
             "error": "No data was provided."
         }
 
-    return result
+    # trim the raw Canvas JSON down to what NaviGator needs
+    return parse_canvas_json("announcements", result)
 
 
-# Gemini tool declaration
+# tool declaration
 get_announcements_tool = {
     "name": "get_announcements",
     "description": "Gets all the announcements in a class in a specified date range.",

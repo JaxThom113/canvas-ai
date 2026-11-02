@@ -1,15 +1,16 @@
 # import the Canvas API client
 from services.canvas.canvasService import access_canvas
+from services.canvas.canvasJsonParser import parse_canvas_json
 
 
 # tool function
-def get_grades(
+def get_files(
     base_url: str | None = None, 
     cookies: dict[str, str] | None = None,
     id = None
 ):
     """
-    Returns all grades for a class.
+    Returns all files for a class.
     """
 
     if not base_url:
@@ -20,7 +21,7 @@ def get_grades(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        f"/api/v1/courses/{id}/enrollments"
+        f"/api/v1/courses/{id}/files"
     )
 
     try:
@@ -37,13 +38,14 @@ def get_grades(
             "error": "No data was provided."
         }
 
-    return result
+    # trim the raw Canvas JSON down to what NaviGator needs
+    return parse_canvas_json("files", result)
 
 
-# Gemini tool declaration
-get_grades_tool = {
-    "name": "get_grades",
-    "description": "Gets all the grades in a class.",
+# tool declaration
+get_files_tool = {
+    "name": "get_files",
+    "description": "Gets all the files in a class.",
     "parameters": {
         "type": "object",
         "properties": {

@@ -1,14 +1,16 @@
 # import the Canvas API client
 from services.canvas.canvasService import access_canvas
+from services.canvas.canvasJsonParser import parse_canvas_json
 
 
 # tool function
-def get_todo(
+def get_discussions(
     base_url: str | None = None, 
-    cookies: dict[str, str] | None = None
+    cookies: dict[str, str] | None = None,
+    id = None,
 ):
     """
-    Returns the student's todo list.
+    Returns all discussions for a class.
     """
 
     if not base_url:
@@ -19,7 +21,7 @@ def get_todo(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        "/api/v1/users/self/todo"
+        f"/api/v1/courses/{id}/discussion_topics"
     )
 
     try:
@@ -36,16 +38,22 @@ def get_todo(
             "error": "No data was provided."
         }
 
-    return result
+    # trim the raw Canvas JSON down to what NaviGator needs
+    return parse_canvas_json("discussions", result)
 
 
-# Gemini tool declaration
-get_todo_tool = {
-    "name": "get_todo",
-    "description": "Gets the todo list of the user.",
+# tool declaration
+get_discussions_tool = {
+    "name": "get_discussions",
+    "description": "Gets all the discussions in a class.",
     "parameters": {
         "type": "object",
-        "properties": {},
+        "properties": {
+            "id": {
+                "type": "string",
+                "description": "The 7-digit id number for a class seen when accessing the /api/v1/users/self/courses Canvas API endpoint."
+            }
+        },
         "required": []
     }
 }

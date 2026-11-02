@@ -1,10 +1,22 @@
 {
     "manifest_version": 3,
-    "name": "CanvasAI",
+    "name": "Canvy",
     "version": "1.0",
-    "description": "AI agent extension for Canvas.",
+    "description": "AI search assist tool for Canvas.",
+    "icons": {
+        "16": "canvy_logo.png",
+        "32": "canvy_logo.png",
+        "48": "canvy_logo.png",
+        "128": "canvy_logo.png"
+    },
     "action": {
-        "default_popup": "index.html"
+        "default_popup": "index.html",
+        "default_icon": {
+            "16": "canvy_logo.png",
+            "32": "canvy_logo.png",
+            "48": "canvy_logo.png",
+            "128": "canvy_logo.png"
+        }
     },
     "host_permissions": [
         "https://*.instructure.com/*"

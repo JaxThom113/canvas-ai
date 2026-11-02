@@ -1,15 +1,15 @@
 # import the Canvas API client
 from services.canvas.canvasService import access_canvas
+from services.canvas.canvasJsonParser import parse_canvas_json
 
 
 # tool function
-def get_discussions(
+def get_upcoming_events(
     base_url: str | None = None, 
-    cookies: dict[str, str] | None = None,
-    id = None,
+    cookies: dict[str, str] | None = None
 ):
     """
-    Returns all discussions for a class.
+    Returns the student's list of upcoming events.
     """
 
     if not base_url:
@@ -20,7 +20,7 @@ def get_discussions(
     # build the full Canvas endpoint
     endpoint = (
         f"{base_url.rstrip('/')}"
-        f"/api/v1/courses/{id}/discussion_topics"
+        "/api/v1/users/self/upcoming_events"
     )
 
     try:
@@ -37,21 +37,17 @@ def get_discussions(
             "error": "No data was provided."
         }
 
-    return result
+    # trim the raw Canvas JSON down to what NaviGator needs
+    return parse_canvas_json("upcoming_events", result)
 
 
-# Gemini tool declaration
-get_discussions_tool = {
-    "name": "get_discussions",
-    "description": "Gets all the discussions in a class.",
+# tool declaration
+get_upcoming_events_tool = {
+    "name": "get_upcoming_events",
+    "description": "Gets the list of upcoming events for the user.",
     "parameters": {
         "type": "object",
-        "properties": {
-            "id": {
-                "type": "string",
-                "description": "The 7-digit id number for a class seen when accessing the /api/v1/users/self/courses Canvas API endpoint."
-            }
-        },
+        "properties": {},
         "required": []
     }
 }
