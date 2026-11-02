@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { authenticate, type User } from '../auth'
 
 /*
     Login page, can be opened by picking the profile icon in top right 
@@ -6,16 +7,30 @@ import { useState } from 'react'
 */
 
 type LoginProps = {
+  onLogin: (user: User) => void
   onCreateAccount: () => void
 }
 
-function Login({ onCreateAccount }: LoginProps) {
+function Login({ onLogin, onCreateAccount }: LoginProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.log("Login submitted for", username);
+    setError("");
+    setLoading(true);
+
+    try {
+      onLogin(await authenticate('login', username, password));
+    }
+    catch (error) {
+      setError((error as Error).message);
+    }
+    finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -37,6 +52,7 @@ function Login({ onCreateAccount }: LoginProps) {
             required
             value={username}
             onChange={(event) => setUsername(event.target.value)}
+            placeholder="Username"
             className="mt-2.5 block min-h-12 w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
           />
         </div>
@@ -53,15 +69,21 @@ function Login({ onCreateAccount }: LoginProps) {
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            placeholder="Password"
             className="mt-2.5 block min-h-12 w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
           />
         </div>
 
+        {error && (
+          <p className="text-sm/6 text-red-600">{error}</p>
+        )}
+
         <button
           type="submit"
-          className="block w-full rounded-2xl bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+          disabled={loading}
+          className="block w-full rounded-2xl bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Log in
+          {loading ? 'Logging in...' : 'Log in'}
         </button>
       </form>
 

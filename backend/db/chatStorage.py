@@ -26,6 +26,18 @@ def create_session(account_id: int, title: str) -> int:
     finally:
         conn.close()
 
+def session_belongs_to(session_id: int, account_id: int) -> bool:
+    conn = get_connection()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT 1 FROM session WHERE session_id = %s AND account_id = %s",
+                (session_id, account_id),
+            )
+            return cursor.fetchone() is not None
+    finally:
+        conn.close()
+
 def save_chat(session_id: int, user_message: str, ai_response: str, model: str | None = None) -> int:
     message_json = {"role": "user", "content": user_message}
     response_json = {"role": "assistant", "content": ai_response, "model": model}

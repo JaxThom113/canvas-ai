@@ -9,11 +9,17 @@ import '../App.css'
     to interface with NaviGator
 */  
 
-function Chat() {
+type ChatProps = {
+  token: string | null
+  sessionId: number | null
+  onSessionId: (sessionId: number) => void
+  onLoginExpired: () => void
+}
+
+function Chat({ token, sessionId, onSessionId, onLoginExpired }: ChatProps) {
   const [message, setMessage] = useState("");
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sessionId, setSessionId] = useState<number | null>(null);
 
   // list of prompts that can be displayed above the text field
   const prompts = [
@@ -62,7 +68,8 @@ function Chat() {
       const res = await fetch("http://localhost:8000/chat", {
           method: "POST",
           headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              ...(token ? { "Authorization": `Bearer ${token}` } : {})
           },
           body: JSON.stringify({
               message: message,
@@ -73,8 +80,13 @@ function Chat() {
       });
 
       const data = await res.json();
+      if (res.status === 401) {
+        setResponse(data.detail);
+        onLoginExpired();
+        return;
+      }
       setResponse(data.response);
-      if (data.session_id != null) setSessionId(data.session_id);
+      if (data.session_id != null) onSessionId(data.session_id);
     } 
     catch (error) {
       console.error(error);
@@ -101,11 +113,7 @@ function Chat() {
               name="prompt"
               rows={1}
               onKeyDown={(event) => {
-                if (
-                  event.key === 'Enter' &&
-                  !event.shiftKey &&
-                  !event.nativeEvent.isComposing
-                ) {
+                if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
                   event.preventDefault();
                   event.currentTarget.form?.requestSubmit();
                 }
@@ -128,11 +136,13 @@ function Chat() {
               className="absolute bottom-2 right-2 flex size-8 items-center justify-center rounded-full bg-indigo-500 text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? (
+                // loading spinning animation svg
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="size-5 animate-spin">
                   <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.3" strokeWidth="3" />
                   <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeLinecap="round" strokeWidth="3" />
                 </svg>
               ) : (
+                // up arrow icon svg
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5">
                   <path d="M12 19V5" />
                   <path d="m5 12 7-7 7 7" />
@@ -142,7 +152,6 @@ function Chat() {
 
           </div>
 
-          {/* Pass in the response variable as a prop for the Response component to display */}
           <Response response={response} />
 
         </form>

@@ -1,21 +1,43 @@
 import { useState } from 'react'
+import { authenticate, type User } from '../auth'
 
 /*
-    Create account page, can be opened by clicking thee "Create account" 
+    Create account page, can be opened by clicking the "Create account" 
     link on the login page
 */
 
-function CreateAccount() {
+type CreateAccountProps = {
+  onLogin: (user: User) => void
+}
+
+function CreateAccount({ onLogin }: CreateAccountProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const mismatch = confirm !== "" && password !== confirm;
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (mismatch) return;
-    console.log("Create account submitted for", username);
+    if (mismatch) {
+      return;
+    }
+
+    setError("");
+    setLoading(true);
+
+    // log in with the newly created account
+    try {
+      onLogin(await authenticate('signup', username, password));
+    }
+    catch (error) {
+      setError((error as Error).message);
+    }
+    finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -37,6 +59,7 @@ function CreateAccount() {
             required
             value={username}
             onChange={(event) => setUsername(event.target.value)}
+            placeholder="Username"
             className="mt-2.5 block min-h-12 w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
           />
         </div>
@@ -51,8 +74,10 @@ function CreateAccount() {
             type="password"
             autoComplete="new-password"
             required
+            minLength={8}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            placeholder="Password"
             className="mt-2.5 block min-h-12 w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
           />
         </div>
@@ -69,6 +94,7 @@ function CreateAccount() {
             required
             value={confirm}
             onChange={(event) => setConfirm(event.target.value)}
+            placeholder="Password"
             className="mt-2.5 block min-h-12 w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
           />
           {mismatch && (
@@ -76,11 +102,16 @@ function CreateAccount() {
           )}
         </div>
 
+        {error && (
+          <p className="text-sm/6 text-red-600">{error}</p>
+        )}
+
         <button
           type="submit"
-          className="block w-full rounded-2xl bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+          disabled={loading}
+          className="block w-full rounded-2xl bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Create account
+          {loading ? 'Creating account...' : 'Create account'}
         </button>
       </form>
 
