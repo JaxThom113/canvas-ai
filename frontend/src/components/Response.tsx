@@ -7,7 +7,6 @@ import '../App.css'
     to the frontend
 */  
 
-// props passed down from the parent (Chat.tsx)
 type ResponseProps = {
   response: string
 }

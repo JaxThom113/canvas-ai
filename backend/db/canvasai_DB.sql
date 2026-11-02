@@ -6,8 +6,11 @@ USE canvas_ai;
 
 -- login
 CREATE TABLE login (
-    account_id  BIGINT UNSIGNED PRIMARY KEY,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    account_id     BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    username       VARCHAR(50) NULL,
+    password_hash  VARCHAR(255) NULL,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_login_username UNIQUE (username)
 ) ENGINE=InnoDB;
 
 -- session
