@@ -1,4 +1,4 @@
-import type { User } from '../auth'
+import type { User } from '../utils/auth'
 
 /*
     Account button on top right of extension, turns into logout button when

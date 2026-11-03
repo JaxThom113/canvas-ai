@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { authenticate, type User } from '../auth'
+import { authenticate, type User } from '../utils/auth'
 
 /*
     Login page, can be opened by picking the profile icon in top right 

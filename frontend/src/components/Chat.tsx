@@ -2,7 +2,8 @@
 
 import { useLayoutEffect, useRef, useState } from 'react'
 import Response from './Response'
-import type { HistoryChat } from '../history'
+import type { HistoryChat } from '../utils/history'
+import { clearDraft, loadDraft, saveDraft } from '../utils/draft'
 import '../App.css'
 
 /*
@@ -19,7 +20,7 @@ type ChatProps = {
 }
 
 function Chat({ token, sessionId, viewedChat, onSessionId, onLoginExpired }: ChatProps) {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(loadDraft);
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -104,8 +105,14 @@ function Chat({ token, sessionId, viewedChat, onSessionId, onLoginExpired }: Cha
         onLoginExpired();
         return;
       }
+
+      // message was sent, draft no longer needs to be saved to local storage
+      clearDraft();
+
       setResponse(data.response);
-      if (data.session_id != null) onSessionId(data.session_id);
+      if (data.session_id != null) {
+        onSessionId(data.session_id);
+      }
     } 
     catch (error) {
       console.error(error);
@@ -140,10 +147,13 @@ function Chat({ token, sessionId, viewedChat, onSessionId, onLoginExpired }: Cha
               }}
               value={shownMessage}
               readOnly={viewing}
-              onChange={(event) => setMessage(event.target.value)}
+              onChange={(event) => {
+                setMessage(event.target.value);
+                saveDraft(event.target.value);
+              }}
               placeholder="Type your message..."
               autoComplete="off"
-              className={`block min-h-12 w-full resize-none overflow-hidden rounded-2xl bg-white py-2 pl-3.5 ${viewing ? 'pr-3.5' : 'pr-14'} text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500`}
+              className={`block min-h-12 w-full resize-none overflow-hidden rounded-2xl bg-white py-3 pl-3.5 ${viewing ? 'pr-3.5' : 'pr-14'} text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500`}
             />
 
             {!viewing && (

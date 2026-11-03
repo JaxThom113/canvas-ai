@@ -7,8 +7,8 @@ import CreateAccount from './components/CreateAccount';
 import AccountButton from './components/AccountButton';
 import Logout from './components/Logout';
 import Sidebar from './components/Sidebar';
-import { loadUser, saveUser, clearUser, type User } from './auth';
-import type { HistoryChat } from './history';
+import { loadUser, saveUser, clearUser, type User } from './utils/auth';
+import type { HistoryChat } from './utils/history';
 import canvyLogoFull from './assets/canvy_logo_full.png'
 // import CanvasInfo from './components/demo/CanvasInfo';
 // import DBInterface from './components/demo/DBInterface';
@@ -56,6 +56,13 @@ function App() {
 
   return (
     <div className="flex bg-linear-to-br from-white via-white to-gray-100">
+      {confirmingLogout && (
+        <Logout
+          onConfirm={handleLogout}
+          onCancel={() => setConfirmingLogout(false)}
+        />
+      )}
+      
       {user && (
         <Sidebar
           token={user.token}
@@ -90,7 +97,7 @@ function App() {
           onLogout={() => setConfirmingLogout(true)}
         />
 
-        {/* Handle which page/view/popup to show (Chat, Login, CreateAccount, Logout) */}
+        {/* Handle which page/view/popup to show (Chat, Login, CreateAccount) */}
         {view === 'chat' && (
           <Chat
             key={chatKey}
@@ -110,12 +117,6 @@ function App() {
         {view === 'signup' && (
           <CreateAccount 
             onLogin={handleLogin} 
-          />
-        )}
-        {confirmingLogout && (
-          <Logout
-            onConfirm={handleLogout}
-            onCancel={() => setConfirmingLogout(false)}
           />
         )}
 

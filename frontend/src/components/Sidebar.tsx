@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchSessions, LoginExpiredError, type HistoryChat, type HistorySession } from '../history'
+import { fetchSessions, LoginExpiredError, type HistoryChat, type HistorySession } from '../utils/history'
 
 /*
     Side bar on the left of the extension, only shown when logged in
