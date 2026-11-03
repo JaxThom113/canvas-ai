@@ -8,7 +8,7 @@ AI search assist tool for Canvas
 
 Creating the build folder
 1. Fill in environment variables in the `backend/.env` file (`DB_SSL_CA` can be left blank)
-2. Navigate to backend with `cd backend`
+2. Navigate to root project directory
 3. Create the build folder and start backend with `docker compose up --build`
 4. Open web browser and go to **chrome://extensions** and load `build/canvy` as an unpacked extension
 
