@@ -1,12 +1,80 @@
 import './App.css'
 
+import { useCallback, useState } from 'react'
 import Chat from './components/Chat';
-import CanvasInfo from './components/demo/CanvasInfo';
+import Login from './components/Login';
+import CreateAccount from './components/CreateAccount';
+import AccountButton from './components/AccountButton';
+import Logout from './components/Logout';
+import Sidebar from './components/Sidebar';
+import { loadUser, saveUser, clearUser, type User } from './utils/auth';
+import type { HistoryChat } from './utils/history';
+import canvyLogoFull from './assets/canvy_logo_full.png'
+// import CanvasInfo from './components/demo/CanvasInfo';
+// import DBInterface from './components/demo/DBInterface';
 
 function App() {
+  // view/page states
+  const [view, setView] = useState<'chat' | 'login' | 'signup'>('chat');
+  const [user, setUser] = useState<User | null>(loadUser);
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
+
+  // sessions/chats/history states
+  const [sessionId, setSessionId] = useState<number | null>(null);
+  const [viewedChat, setViewedChat] = useState<HistoryChat | null>(null);
+  const [historyVersion, setHistoryVersion] = useState(0);
+  const [chatKey, setChatKey] = useState(0);
+
+  function handleLogin(loggedInUser: User) {
+    saveUser(loggedInUser);
+    setUser(loggedInUser);
+    setSessionId(null);
+    setViewedChat(null);
+    setView('chat');
+  }
+
+  const handleLogout = useCallback(() => {
+    clearUser();
+    setUser(null);
+    setSessionId(null);
+    setViewedChat(null);
+    setConfirmingLogout(false);
+    setView('chat');
+  }, []);
+
+  function handleChatSaved(newSessionId: number) {
+    setSessionId(newSessionId);
+    setHistoryVersion((version) => version + 1);
+  }
+
+  function handleNewChat() {
+    setSessionId(null);
+    setViewedChat(null);
+    setChatKey((key) => key + 1);
+    setView('chat');
+  }
+
   return (
-    <>
-      <div className="flex flex-col items-center justify-center isolate p-6 bg-gray-900 sm:py-10 lg:px-30">
+    <div className="flex bg-linear-to-br from-white via-white to-gray-100">
+      {confirmingLogout && (
+        <Logout
+          onConfirm={handleLogout}
+          onCancel={() => setConfirmingLogout(false)}
+        />
+      )}
+      
+      {user && (
+        <Sidebar
+          token={user.token}
+          refreshKey={historyVersion}
+          activeChatId={viewedChat?.chat_id ?? null}
+          onSelectChat={setViewedChat}
+          onNewChat={handleNewChat}
+          onLoginExpired={handleLogout}
+        />
+      )}
+
+      <div className="flex min-w-0 flex-1 flex-col items-center justify-start isolate p-6 sm:py-10 lg:px-30">
         <div
           aria-hidden="true"
           className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
@@ -16,20 +84,48 @@ function App() {
               clipPath:
                 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
             }}
-            className="relative left-1/2 -z-10 aspect-1155/678 w-144.5 max-w-none -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-20 sm:left-[calc(50%-40rem)] sm:w-288.75"
+            className="relative left-1/2 -z-10 aspect-1155/678 w-144.5 max-w-none -translate-x-1/2 rotate-30 bg-linear-to-tr from-gray-200 to-gray-400 opacity-30 sm:left-[calc(50%-40rem)] sm:w-288.75"
           />
         </div>
 
-        <h1 className="block text-4xl font-semibold text-white">
-          CanvasAI
-        </h1>
+        <img src={canvyLogoFull} alt="Canvy Logo Full" className="w-48 max-w-full sm:w-56" />
 
-        <Chat />
+        <AccountButton
+          user={user}
+          view={view}
+          onToggleLogin={() => setView(view === 'chat' ? 'login' : 'chat')}
+          onLogout={() => setConfirmingLogout(true)}
+        />
 
-        <CanvasInfo />
+        {/* Handle which page/view/popup to show (Chat, Login, CreateAccount) */}
+        {view === 'chat' && (
+          <Chat
+            key={chatKey}
+            token={user?.token ?? null}
+            sessionId={sessionId}
+            viewedChat={viewedChat}
+            onSessionId={handleChatSaved}
+            onLoginExpired={handleLogout}
+          />
+        )}
+        {view === 'login' && (
+          <Login 
+            onLogin={handleLogin} 
+            onCreateAccount={() => setView('signup')} 
+          />
+        )}
+        {view === 'signup' && (
+          <CreateAccount 
+            onLogin={handleLogin} 
+          />
+        )}
+
+        {/* Demo/testing components */}
+        {/* <CanvasInfo /> */}
+        {/* <DBInterface /> */}
 
       </div>
-    </>
+    </div>
   )
 }
 

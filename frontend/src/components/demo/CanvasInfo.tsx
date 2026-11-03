@@ -30,17 +30,22 @@ function CanvasInfo() {
       return;
     }
 
-    const currentOrigin = new URL(tab.url).origin;
-    const nextEndpoint = endpoint.trim();
+    // infer base URL from the currently open Canvas tab (i.e. https://ufl.instructure.com)
+    const baseURL = new URL(tab.url).origin;
+    setEndpoint(endpoint.trim());
 
-    setEndpoint(nextEndpoint);
+    // combine the base URL and the endpoint (i.e. "https://ufl.instructure.com" + "/api/v1/users/self/courses")
+    // endpoint first, then base URL: new URL("/api/v1/users/self/courses", "https://ufl.instructure.com")
+    const fullURL = new URL(endpoint, baseURL).href;
+
     setLoading(true);
     setResponse('');
     setStatus('Fetching...');
 
+    // access changes in Chrome from the open Canvas tab
     chrome.storage.local.set({ 
-        canvasBaseUrl: currentOrigin, 
-        canvasEndpoint: nextEndpoint 
+        canvasBaseUrl: baseURL, 
+        canvasEndpoint: fullURL 
     });
 
     try {
@@ -51,7 +56,7 @@ function CanvasInfo() {
       }
 
       // access cookies from the base URL of the currently opened Canvas tab
-      const cookies = await chrome.cookies.getAll({ url: nextEndpoint });
+      const cookies = await chrome.cookies.getAll({ url: fullURL });
       const cookieMap = Object.fromEntries(
         cookies.map((cookie) => [cookie.name, cookie.value])
       );
@@ -63,7 +68,7 @@ function CanvasInfo() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          endpoint: nextEndpoint,
+          endpoint: fullURL,
           cookies: cookieMap,
         }),
       });
@@ -114,20 +119,20 @@ function CanvasInfo() {
 
   return (
     <>
-      <div className="mt-6">
+      <div className="mt-6 flex w-full max-w-2xl flex-col items-center rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <form onSubmit={getCanvasData} className="flex flex-col items-center">
-          <label htmlFor="prompt" className="block text-sm/6 font-semibold text-white">
+          <label htmlFor="prompt" className="block text-sm/6 font-semibold text-gray-900">
             Canvas API endpoint
           </label>
-          <div className="mt-2.5">
+          <div className="relative mt-2.5 w-100 max-w-full">
             <input
               id="prompt"
               name="prompt"
-              type="url"
+              type="text"
               value={endpoint}
               onChange={(e) => setEndpoint(e.target.value)}
-              placeholder="https://schoolname.instructure.com/api/v1/"
-              className="block w-100 rounded-md bg-white/5 px-3.5 py-2 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+              placeholder="api/v1/users/self/courses"
+              className="block min-h-12 w-full rounded-2xl bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
             />
           </div>
           
@@ -135,17 +140,17 @@ function CanvasInfo() {
             <button
               type="submit"
               disabled={loading}
-              className="block rounded-md bg-orange-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+              className="block rounded-md bg-indigo-500 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? 'Getting endpoint data...' : 'Access API Endpoint'}
             </button>
           </div>
 
-          {error && status && <p className="mt-4 text-sm text-red-500">{status}</p>}
-          {!error && status && <p className="mt-4 text-sm text-white">{status}</p>}
+          {error && status && <p className="mt-4 text-sm text-red-600">{status}</p>}
+          {!error && status && <p className="mt-4 text-sm text-gray-700">{status}</p>}
 
           {response && (
-            <pre className="mt-6 max-w-2xl w-full rounded-md bg-white/10 p-4 text-left text-xs text-white overflow-auto whitespace-pre-wrap">
+            <pre className="mt-6 w-full max-w-2xl overflow-auto whitespace-pre-wrap wrap-break-word rounded-md border border-gray-200 bg-white p-4 text-left text-xs text-gray-900">
               {response}
             </pre>
           )}
