@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { authenticate, type User } from '../auth'
+import { authenticate, type User } from '../utils/auth'
 
 /*
     Create account page, can be opened by clicking the "Create account" 

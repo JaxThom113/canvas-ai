@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 
 import mariadb
@@ -11,7 +12,7 @@ from services.navigator.navigatorService import ask_navigator
 from services.canvas.canvasService import access_canvas
 from app.auth import UsernameTakenError, create_account, create_token, verify_login, verify_token
 from app.db import insert_login, insert_session, insert_chat
-from db.chatStorage import create_session, save_chat, session_belongs_to
+from db.chatStorage import create_session, get_sessions, save_chat, session_belongs_to
 
 
 app = FastAPI()
@@ -162,6 +163,37 @@ def chat(request: ChatRequest, authorization: str | None = Header(default=None))
         "response": response,
         "session_id": session_id
     }
+
+
+"""
+Endpoints for viewing the logged in user's chat history
+"""
+
+class HistoryChat(BaseModel):
+    chat_id: int
+    message: str
+    response: str
+    created_at: datetime | None = None
+
+
+class HistorySession(BaseModel):
+    session_id: int
+    session_title: str
+    created_at: datetime | None = None
+    chats: list[HistoryChat]
+
+
+@app.get("/sessions", response_model=list[HistorySession])
+def sessions(authorization: str | None = Header(default=None)):
+    # returns the user's sessions/chats, most recent first
+    account_id = None
+    if authorization:
+        account_id = verify_token(authorization.removeprefix("Bearer ").strip())
+
+    if account_id is None:
+        raise HTTPException(status_code=401, detail="Your login has expired. Please log in again.")
+
+    return get_sessions(account_id)
 
 
 """

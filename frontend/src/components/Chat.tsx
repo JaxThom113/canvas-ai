@@ -1,7 +1,9 @@
 /// <reference types="chrome" />
 
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import Response from './Response'
+import type { HistoryChat } from '../utils/history'
+import { clearDraft, loadDraft, saveDraft } from '../utils/draft'
 import '../App.css'
 
 /*
@@ -12,14 +14,29 @@ import '../App.css'
 type ChatProps = {
   token: string | null
   sessionId: number | null
+  viewedChat: HistoryChat | null
   onSessionId: (sessionId: number) => void
   onLoginExpired: () => void
 }
 
-function Chat({ token, sessionId, onSessionId, onLoginExpired }: ChatProps) {
-  const [message, setMessage] = useState("");
+function Chat({ token, sessionId, viewedChat, onSessionId, onLoginExpired }: ChatProps) {
+  const [message, setMessage] = useState(loadDraft);
   const [response, setResponse] = useState("");
   const [loading, setLoading] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const viewing = viewedChat !== null;
+  const shownMessage = viewing ? viewedChat.message : message;
+  const shownResponse = viewing ? viewedChat.response : response;
+
+  // grow the text field to fit whatever message is shown
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      return
+    };
+    textarea.style.height = '0px';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [shownMessage]);
 
   // list of prompts that can be displayed above the text field
   const prompts = [
@@ -36,6 +53,9 @@ function Chat({ token, sessionId, onSessionId, onLoginExpired }: ChatProps) {
   async function sendMessage(event: React.FormEvent<HTMLFormElement>) 
   {
     event.preventDefault();
+    if (viewing) {
+      return
+    };
     setLoading(true);
 
     try {
@@ -85,8 +105,14 @@ function Chat({ token, sessionId, onSessionId, onLoginExpired }: ChatProps) {
         onLoginExpired();
         return;
       }
+
+      // message was sent, draft no longer needs to be saved to local storage
+      clearDraft();
+
       setResponse(data.response);
-      if (data.session_id != null) onSessionId(data.session_id);
+      if (data.session_id != null) {
+        onSessionId(data.session_id);
+      }
     } 
     catch (error) {
       console.error(error);
@@ -99,60 +125,63 @@ function Chat({ token, sessionId, onSessionId, onLoginExpired }: ChatProps) {
 
   return (
     <>
-      <div className="mt-6">
-        <form onSubmit={sendMessage} className="flex flex-col items-center">
+      <div className="mt-6 w-full">
+        <form onSubmit={sendMessage} className="flex w-full flex-col items-center">
           
           <label htmlFor="prompt" className="block text-sm/6 font-semibold text-gray-900">
-            {prompt}
+            {viewing ? 'Viewing a previous chat' : prompt}
           </label>
 
           <div className="relative mt-2.5 w-100 max-w-full">
 
             <textarea
+              ref={textareaRef}
               id="prompt"
               name="prompt"
               rows={1}
               onKeyDown={(event) => {
-                if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                if (!viewing && event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
                   event.preventDefault();
                   event.currentTarget.form?.requestSubmit();
                 }
               }}
-              value={message}
+              value={shownMessage}
+              readOnly={viewing}
               onChange={(event) => {
                 setMessage(event.target.value);
-                event.target.style.height = '0px';
-                event.target.style.height = `${event.target.scrollHeight}px`;
+                saveDraft(event.target.value);
               }}
               placeholder="Type your message..."
               autoComplete="off"
-              className="block min-h-12 w-full resize-none overflow-hidden rounded-2xl bg-white py-2 pl-3.5 pr-14 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+              className={`block min-h-12 w-full resize-none overflow-hidden rounded-2xl bg-white py-3 pl-3.5 ${viewing ? 'pr-3.5' : 'pr-14'} text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500`}
             />
 
-            <button
-              type="submit"
-              disabled={loading}
-              aria-label={loading ? 'Waiting for response' : 'Send message'}
-              className="absolute bottom-2 right-2 flex size-8 items-center justify-center rounded-full bg-indigo-500 text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? (
-                // loading spinning animation svg
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="size-5 animate-spin">
-                  <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.3" strokeWidth="3" />
-                  <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeLinecap="round" strokeWidth="3" />
-                </svg>
-              ) : (
-                // up arrow icon svg
-                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5">
-                  <path d="M12 19V5" />
-                  <path d="m5 12 7-7 7 7" />
-                </svg>
-              )}
-            </button>
+            {!viewing && (
+              <button
+                type="submit"
+                disabled={loading}
+                aria-label={loading ? 'Waiting for response' : 'Send message'}
+                className="absolute bottom-2 right-2 flex size-8 items-center justify-center rounded-full bg-indigo-500 text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? (
+                  // loading spinning animation svg
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="size-5 animate-spin">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeOpacity="0.3" strokeWidth="3" />
+                    <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeLinecap="round" strokeWidth="3" />
+                  </svg>
+                ) : (
+                  // up arrow icon svg
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+                    <path d="M12 19V5" />
+                    <path d="m5 12 7-7 7 7" />
+                  </svg>
+                )}
+              </button>
+            )}
 
           </div>
 
-          <Response response={response} />
+          <Response response={shownResponse} />
 
         </form>
       </div>
