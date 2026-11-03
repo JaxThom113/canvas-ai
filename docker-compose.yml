@@ -1,0 +1,17 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file: ./backend/.env
+    environment:
+      # overrides the path for DB_SSL_CA in .env with the cert in the backend
+      DB_SSL_CA: /app/certs/globalsignrootca.pem
+    restart: unless-stopped
+
+  # builds the Chrome extension into ./build
+  extension:
+    build:
+      context: ./frontend
+    volumes:
+      - ./build:/out
