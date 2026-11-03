@@ -1,13 +1,80 @@
 import './App.css'
 
+import { useCallback, useState } from 'react'
 import Chat from './components/Chat';
-// import CanvasInfo from './components/demo/CanvasInfo';
+import Login from './components/Login';
+import CreateAccount from './components/CreateAccount';
+import AccountButton from './components/AccountButton';
+import Logout from './components/Logout';
+import Sidebar from './components/Sidebar';
+import { loadUser, saveUser, clearUser, type User } from './utils/auth';
+import type { HistoryChat } from './utils/history';
 import canvyLogoFull from './assets/canvy_logo_full.png'
+// import CanvasInfo from './components/demo/CanvasInfo';
+// import DBInterface from './components/demo/DBInterface';
 
 function App() {
+  // view/page states
+  const [view, setView] = useState<'chat' | 'login' | 'signup'>('chat');
+  const [user, setUser] = useState<User | null>(loadUser);
+  const [confirmingLogout, setConfirmingLogout] = useState(false);
+
+  // sessions/chats/history states
+  const [sessionId, setSessionId] = useState<number | null>(null);
+  const [viewedChat, setViewedChat] = useState<HistoryChat | null>(null);
+  const [historyVersion, setHistoryVersion] = useState(0);
+  const [chatKey, setChatKey] = useState(0);
+
+  function handleLogin(loggedInUser: User) {
+    saveUser(loggedInUser);
+    setUser(loggedInUser);
+    setSessionId(null);
+    setViewedChat(null);
+    setView('chat');
+  }
+
+  const handleLogout = useCallback(() => {
+    clearUser();
+    setUser(null);
+    setSessionId(null);
+    setViewedChat(null);
+    setConfirmingLogout(false);
+    setView('chat');
+  }, []);
+
+  function handleChatSaved(newSessionId: number) {
+    setSessionId(newSessionId);
+    setHistoryVersion((version) => version + 1);
+  }
+
+  function handleNewChat() {
+    setSessionId(null);
+    setViewedChat(null);
+    setChatKey((key) => key + 1);
+    setView('chat');
+  }
+
   return (
-    <>
-      <div className="flex flex-col items-center justify-start isolate bg-linear-to-br from-white via-white to-gray-100 p-6 sm:py-10 lg:px-30">
+    <div className="flex bg-linear-to-br from-white via-white to-gray-100">
+      {confirmingLogout && (
+        <Logout
+          onConfirm={handleLogout}
+          onCancel={() => setConfirmingLogout(false)}
+        />
+      )}
+      
+      {user && (
+        <Sidebar
+          token={user.token}
+          refreshKey={historyVersion}
+          activeChatId={viewedChat?.chat_id ?? null}
+          onSelectChat={setViewedChat}
+          onNewChat={handleNewChat}
+          onLoginExpired={handleLogout}
+        />
+      )}
+
+      <div className="flex min-w-0 flex-1 flex-col items-center justify-start isolate p-6 sm:py-10 lg:px-30">
         <div
           aria-hidden="true"
           className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
@@ -21,18 +88,44 @@ function App() {
           />
         </div>
 
-        <img
-          src={canvyLogoFull}
-          alt="Canvy Logo Full"
-          className="w-48 max-w-full sm:w-56"
+        <img src={canvyLogoFull} alt="Canvy Logo Full" className="w-48 max-w-full sm:w-56" />
+
+        <AccountButton
+          user={user}
+          view={view}
+          onToggleLogin={() => setView(view === 'chat' ? 'login' : 'chat')}
+          onLogout={() => setConfirmingLogout(true)}
         />
 
-        <Chat />
+        {/* Handle which page/view/popup to show (Chat, Login, CreateAccount) */}
+        {view === 'chat' && (
+          <Chat
+            key={chatKey}
+            token={user?.token ?? null}
+            sessionId={sessionId}
+            viewedChat={viewedChat}
+            onSessionId={handleChatSaved}
+            onLoginExpired={handleLogout}
+          />
+        )}
+        {view === 'login' && (
+          <Login 
+            onLogin={handleLogin} 
+            onCreateAccount={() => setView('signup')} 
+          />
+        )}
+        {view === 'signup' && (
+          <CreateAccount 
+            onLogin={handleLogin} 
+          />
+        )}
 
+        {/* Demo/testing components */}
         {/* <CanvasInfo /> */}
+        {/* <DBInterface /> */}
 
       </div>
-    </>
+    </div>
   )
 }
 

@@ -7,7 +7,6 @@ import '../App.css'
     to the frontend
 */  
 
-// props passed down from the parent (Chat.tsx)
 type ResponseProps = {
   response: string
 }
@@ -70,7 +69,7 @@ function Response({ response }: ResponseProps) {
 
   return (
     <>
-      <div className="mt-6 flex flex-col items-center">
+      <div className="mt-6 flex w-full flex-col items-center">
 
         {response && (
             <div className="mt-6 w-full max-w-2xl space-y-3 wrap-break-word rounded-md border border-gray-200 bg-white p-4 text-left text-gray-900">
