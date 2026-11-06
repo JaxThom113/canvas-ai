@@ -75,7 +75,7 @@ def parse_assignment(assignment: dict[str, Any]) -> dict[str, Any]:
         "locked": assignment.get("locked_for_user"),
         "lock_explanation": assignment.get("lock_explanation"),
         "submission": parse_submission(assignment.get("submission")),
-        "description": html_to_text(assignment.get("description")),
+        # "description": html_to_text(assignment.get("description")),
         "html_url": assignment.get("html_url"),
     })
 
@@ -196,7 +196,7 @@ def parse_quiz(quiz: dict[str, Any]) -> dict[str, Any]:
         "allowed_attempts": attempts if attempts and attempts > 0 else None,
         "locked": quiz.get("locked_for_user"),
         "lock_explanation": quiz.get("lock_explanation"),
-        "description": html_to_text(quiz.get("description")),
+        # "description": html_to_text(quiz.get("description")),
         "html_url": quiz.get("html_url"),
     })
 

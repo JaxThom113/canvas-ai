@@ -10,10 +10,6 @@ MESSAGE_LIMIT = 600
 
 # used with canvasJsonParser, this helps convert HTML given in the JSON to normal text
 class HtmlTextExtractor(HTMLParser):
-    """
-    Collects visible text from an HTML string, keeping rough line breaks.
-    """
-
     BLOCK_TAGS = {"p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "table"}
     SKIP_TAGS = {"script", "style"}
 
@@ -42,10 +38,6 @@ class HtmlTextExtractor(HTMLParser):
 
 
 def html_to_text(html: str | None, limit: int | None = DESCRIPTION_LIMIT) -> str | None:
-    """
-    Converts Canvas HTML into plain text and truncates it to the given limit.
-    """
-
     if not html:
         return None
 
